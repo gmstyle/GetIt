@@ -1,5 +1,6 @@
 package it.gmstyle.getit.data.dao
 
+import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
@@ -7,6 +8,7 @@ import androidx.room.Update
 import it.gmstyle.getit.data.entities.ShoppingItem
 import kotlinx.coroutines.flow.Flow
 
+@Dao
 interface ShoppingItemDao {
 
     @Query("SELECT * FROM ShoppingItem where listId = :listId")
