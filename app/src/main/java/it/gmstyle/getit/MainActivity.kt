@@ -14,14 +14,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import it.gmstyle.getit.ui.theme.GetItTheme
 
 class MainActivity : ComponentActivity() {
+
+    private lateinit var myApplication: MyApplication
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        myApplication = application as MyApplication
         enableEdgeToEdge()
         setContent {
             GetItTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting(
-                        name = "Android",
+                        name = "Android developer",
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
