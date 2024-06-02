@@ -10,8 +10,9 @@ class ShoppingListRepository(
     private val listDao: ShoppingListDao, private val itemDao: ShoppingItemDao) {
 
     val lists: Flow<List<ShoppingList>> = listDao.getAll()
-    fun getItemsByListId(listId: Int): Flow<List<ShoppingItem>> = itemDao.getAllByListId(listId)
 
+    fun getListById(listId: Int): Flow<ShoppingList> = listDao.getById(listId)
+    fun getItemsByListId(listId: Int): Flow<List<ShoppingItem>> = itemDao.getAllByListId(listId)
     suspend fun insertList(shoppingList: ShoppingList): Long = listDao.insert(shoppingList)
 
     suspend fun deleteList(shoppingList: ShoppingList) = listDao.delete(shoppingList)

@@ -6,12 +6,15 @@ import it.gmstyle.getit.data.entities.ShoppingItem
 import it.gmstyle.getit.data.entities.ShoppingList
 import it.gmstyle.getit.data.repositories.ShoppingListRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.launch
 
 class ShoppingListViewModel(private val repository: ShoppingListRepository) : ViewModel() {
 
     val shoppingLists: Flow<List<ShoppingList>> = repository.lists
 
+    fun getShoppingListById(listId: Int): Flow<ShoppingList> =
+        repository.getListById(listId)
     fun getItemsByListId(listId: Int): Flow<List<ShoppingItem>> =
         repository.getItemsByListId(listId)
 
