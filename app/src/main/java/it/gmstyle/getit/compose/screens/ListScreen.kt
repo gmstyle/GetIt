@@ -20,8 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import it.gmstyle.getit.data.entities.ShoppingItem
+import it.gmstyle.getit.data.entities.ListItem
 import it.gmstyle.getit.viewmodels.ShoppingListViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -42,7 +41,7 @@ fun ShoppingListScreen(
                 modifier = Modifier.weight(1f)
             )
             Button(onClick = {
-                viewModel.insertItem(ShoppingItem(listId = listId.toInt(), name = newItemName))
+                viewModel.insertItem(ListItem(listId = listId.toInt(), name = newItemName))
                 newItemName = ""
             }) {
                 Text("Add")

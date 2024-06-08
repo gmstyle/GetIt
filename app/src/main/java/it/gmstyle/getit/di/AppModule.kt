@@ -2,11 +2,10 @@ package it.gmstyle.getit.di
 
 import androidx.room.Room
 import it.gmstyle.getit.data.ShoppingListDatabase
-import it.gmstyle.getit.data.dao.ShoppingItemDao
+import it.gmstyle.getit.data.dao.ListItemDao
 import it.gmstyle.getit.data.dao.ShoppingListDao
 import it.gmstyle.getit.data.repositories.ShoppingListRepository
 import it.gmstyle.getit.viewmodels.ShoppingListViewModel
-import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
@@ -22,12 +21,12 @@ val appModule = module {
         val db = get<ShoppingListDatabase>()
         db.shoppingListDao()
     }
-    single<ShoppingItemDao> {
+    single<ListItemDao> {
         val db = get<ShoppingListDatabase>()
         db.shoppingItemDao()
     }
     ///Repositories
-    single<ShoppingListRepository> { ShoppingListRepository(get<ShoppingListDao>(), get<ShoppingItemDao>()) }
+    single<ShoppingListRepository> { ShoppingListRepository(get<ShoppingListDao>(), get<ListItemDao>()) }
 
     ///ViewModels
     viewModel<ShoppingListViewModel> { ShoppingListViewModel(get<ShoppingListRepository>()) }

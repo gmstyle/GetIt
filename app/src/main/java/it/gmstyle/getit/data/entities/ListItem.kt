@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 
 
 @Entity
-data class ShoppingItem(
+data class ListItem(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val name: String,
     val completed: Boolean = false,
