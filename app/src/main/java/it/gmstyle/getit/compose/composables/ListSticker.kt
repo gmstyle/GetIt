@@ -20,9 +20,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import it.gmstyle.getit.data.entities.ShoppingList
+import it.gmstyle.getit.data.entities.ShoppingListWithItems
 
 @Composable
-fun ShoppingListSticker(shoppingList: ShoppingList, onViewList: () -> Unit, onDeleteList: () -> Unit) {
+fun ShoppingListSticker(shoppingList: ShoppingListWithItems, onViewList: () -> Unit, onDeleteList: () -> Unit) {
     Card(
         modifier = Modifier
             .padding(8.dp)
@@ -36,7 +37,7 @@ fun ShoppingListSticker(shoppingList: ShoppingList, onViewList: () -> Unit, onDe
                 .padding(16.dp)
                 .fillMaxWidth()
         ) {
-            Text(text = shoppingList.name, style = MaterialTheme.typography.headlineSmall)
+            Text(text = shoppingList.list.name, style = MaterialTheme.typography.headlineSmall)
             Spacer(modifier = Modifier.height(8.dp))
             Row(
                 horizontalArrangement = Arrangement.End,

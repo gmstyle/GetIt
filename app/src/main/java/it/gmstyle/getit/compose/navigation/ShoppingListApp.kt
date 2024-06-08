@@ -17,8 +17,10 @@ fun ShoppingListApp() {
             // Add destinations here
             composable("shoppingLists") { ShoppingListsScreen(navController = navController) }
             composable("list/{id}") { navBackStackEntry ->
-                val listId = navBackStackEntry.arguments?.getString("id") ?: ""
-                ShoppingListScreen(listId = listId)
+                val listId = navBackStackEntry.arguments?.getString("id") ?: "0"
+                ShoppingListScreen(
+                    navController = navController,
+                    listId = listId)
             }
         }
     }

@@ -1,40 +1,22 @@
 package it.gmstyle.getit.viewmodels
 
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import it.gmstyle.getit.data.entities.ListItem
 import it.gmstyle.getit.data.entities.ShoppingList
 import it.gmstyle.getit.data.entities.ShoppingListWithItems
 import it.gmstyle.getit.data.repositories.ShoppingListRepository
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
-class ShoppingListViewModel(private val repository: ShoppingListRepository) : ViewModel() {
+class ShoppingListsViewModel(private val repository: ShoppingListRepository) : ViewModel() {
 
-    val listName = mutableStateOf("")
-    val list = MutableStateFlow(ShoppingListWithItems(ShoppingList(0, ""), emptyList()))
-    val items = MutableStateFlow(emptyList<ListItem>())
-    val newListId = mutableIntStateOf(0)
+    val shoppingLists: Flow<List<ShoppingListWithItems>> = repository.lists
 
-    fun getShoppingListWithItems(listId: Int) {
+    fun insertList(list: ShoppingList) {
         viewModelScope.launch {
-            repository.getListById(listId)
-                .collect {
-                    list.value = it
-                    listName.value = it.list.name
-                    items.value = it.items
-                }
+            repository.insertList(list)
         }
-    }
-
-    fun saveList(list: ShoppingList): Int {
-        viewModelScope.launch {
-            val id = repository.insertList(list)
-            newListId.intValue = id.toInt()
-        }
-        return newListId.intValue
     }
 
     fun deleteList(list: ShoppingList) {
