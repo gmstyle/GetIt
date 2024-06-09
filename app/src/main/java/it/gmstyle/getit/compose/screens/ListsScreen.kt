@@ -82,7 +82,7 @@ fun ShoppingListsScreen(
                             navController.navigate("list/${list.list.id}")
                         },
                         onDeleteList = {
-                            viewModel.deleteList(list.list)
+                            viewModel.deleteListWithItems(list.list)
                         }
                     )
                 }

@@ -1,5 +1,6 @@
 package it.gmstyle.getit.compose.screens
 
+import android.view.WindowId
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,9 +31,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -40,7 +41,6 @@ import androidx.navigation.NavController
 import it.gmstyle.getit.data.entities.ListItem
 import it.gmstyle.getit.data.entities.ShoppingList
 import it.gmstyle.getit.viewmodels.ShoppingListViewModel
-import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,9 +50,9 @@ fun ShoppingListScreen(
     listId: String,
     viewModel: ShoppingListViewModel = koinViewModel<ShoppingListViewModel>()
 ) {
-    val coroutineScope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val listItems by viewModel.items.collectAsState(initial = emptyList())
+    var itemName by remember { mutableStateOf(viewModel.itemName.value) }
 
     LaunchedEffect(key1 = Unit) {
         if (listId != "0") {
@@ -87,19 +87,23 @@ fun ShoppingListScreen(
             modifier = Modifier.padding(innerPadding)
         ) {
             Row {
-                TextField(value = viewModel.listName.value, onValueChange = { newName ->
-                    viewModel.listName.value = newName
+                TextField(value = viewModel.listName.value, onValueChange = { newListName ->
+                    viewModel.listName.value = newListName
                 }, label = { Text("List Name") }, modifier = Modifier.weight(1f)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Button(onClick = {
-                    if (listId == "0") {
-                        val list = ShoppingList(name = viewModel.listName.value)
-                        viewModel.saveList(list)
+                    if (listId != "0" && viewModel.newListId.intValue == 0) {
+                        viewModel.updateList(ShoppingList(listId.toInt(), viewModel.listName.value))
+                    } else if (listId == "0" && viewModel.newListId.intValue == 0) {
+                        viewModel.saveList(ShoppingList(name = viewModel.listName.value))
                     } else {
-                        val list =
-                            ShoppingList(id = listId.toInt(), name = viewModel.listName.value)
-                        viewModel.updateList(list)
+                        viewModel.updateList(
+                            ShoppingList(
+                                viewModel.newListId.intValue,
+                                viewModel.listName.value
+                            )
+                        )
                     }
                 }) {
                     Text("Save")
@@ -111,41 +115,27 @@ fun ShoppingListScreen(
             ) {
                 // Aggiungi un singolo elemento per l'aggiunta di un nuovo elemento
                 item {
-                    var newItemName by remember { mutableStateOf("") }
 
                     Row {
                         TextField(
                             modifier = Modifier.weight(1f),
-                            value = newItemName,
+                            value = itemName,
                             onValueChange = { newName ->
-                                newItemName = newName
+                               itemName = newName
                             },
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         IconButton(onClick = {
-                            //TODO: funziona ma formalmente non corretto e da rivedere
-                            if (listId != "0") {
-                                viewModel.insertItem(
-                                    ListItem(
-                                        name = newItemName, listId = listId.toInt()
-                                    )
-                                )
-                                coroutineScope.launch {
-                                    viewModel.getShoppingListWithItems(listId.toInt())
-                                }
-                            } else {
-                                viewModel.insertItem(
-                                    ListItem(
-                                        name = newItemName,
-                                        listId = viewModel.newListId.intValue
-                                    )
-                                )
-                                coroutineScope.launch {
-                                    viewModel.getShoppingListWithItems(viewModel.newListId.intValue)
-                                }
-                            }
+                            val listItem = if (listId != "0") {
+                                ListItem(listId = listId.toInt(), name = itemName)
 
-                            newItemName = ""
+                            } else {
+                                ListItem(name = itemName,
+                                    listId = viewModel.newListId.intValue)
+                            }
+                         viewModel.saveItem(listItem)
+
+                            itemName = ""
                         }) {
                             Icon(imageVector = Icons.Default.Add, contentDescription = null)
                         }

@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 class ShoppingListViewModel(private val repository: ShoppingListRepository) : ViewModel() {
 
     val listName = mutableStateOf("")
+    var itemName = mutableStateOf("")
     val list = MutableStateFlow(ShoppingListWithItems(ShoppingList(0, ""), emptyList()))
     val items = MutableStateFlow(emptyList<ListItem>())
     val newListId = mutableIntStateOf(0)
@@ -29,17 +30,10 @@ class ShoppingListViewModel(private val repository: ShoppingListRepository) : Vi
         }
     }
 
-    fun saveList(list: ShoppingList): Int {
+    fun saveList(list: ShoppingList) {
         viewModelScope.launch {
             val id = repository.insertList(list)
             newListId.intValue = id.toInt()
-        }
-        return newListId.intValue
-    }
-
-    fun deleteList(list: ShoppingList) {
-        viewModelScope.launch {
-            repository.deleteList(list)
         }
     }
 
@@ -49,9 +43,11 @@ class ShoppingListViewModel(private val repository: ShoppingListRepository) : Vi
         }
     }
 
-    fun insertItem(item: ListItem) {
+    fun saveItem(item: ListItem) {
         viewModelScope.launch {
             repository.insertItem(item)
+        }.invokeOnCompletion {
+            getShoppingListWithItems(item.listId)
         }
     }
 

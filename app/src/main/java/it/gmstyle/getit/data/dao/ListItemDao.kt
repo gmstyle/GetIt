@@ -22,4 +22,8 @@ interface ListItemDao {
 
     @Update
     suspend fun update(listItem: ListItem)
+
+    // delete all items from a list
+    @Query("DELETE FROM ListItem where listId = :listId")
+    suspend fun deleteAllByListId(listId: Int)
 }

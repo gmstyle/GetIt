@@ -24,5 +24,7 @@ class ShoppingListRepository(
 
     suspend fun deleteItem(listItem: ListItem) = itemDao.delete(listItem)
 
+    suspend fun deleteAllItemsByListId(listId: Int) = itemDao.deleteAllByListId(listId)
+
     suspend fun updateItem(listItem: ListItem) = itemDao.update(listItem)
 }
