@@ -9,23 +9,28 @@ import it.gmstyle.getit.data.entities.ShoppingList
 import it.gmstyle.getit.data.entities.ShoppingListWithItems
 import it.gmstyle.getit.data.repositories.ShoppingListRepository
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.onErrorReturn
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
 class ShoppingListViewModel(private val repository: ShoppingListRepository) : ViewModel() {
 
-    val listName = mutableStateOf("")
-    var itemName = mutableStateOf("")
-    val list = MutableStateFlow(ShoppingListWithItems(ShoppingList(0, ""), emptyList()))
-    val items = MutableStateFlow(emptyList<ListItem>())
+    private val _state = MutableStateFlow<ShoppingListState>(ShoppingListState.Loading)
+    val state get() = _state
     val newListId = mutableIntStateOf(0)
 
     fun getShoppingListWithItems(listId: Int) {
         viewModelScope.launch {
             repository.getListById(listId)
+                .onStart {
+                    _state.value = ShoppingListState.Loading
+                }.catch {
+                    _state.value =
+                        ShoppingListState.Error(it.message ?: "An unexpected error occurred")
+                }
                 .collect {
-                    list.value = it
-                    listName.value = it.list.name
-                    items.value = it.items
+                    _state.value = ShoppingListState.Success(it)
                 }
         }
     }
