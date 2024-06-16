@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.secrets.gradle.plugin)
 }
 
 android {
@@ -40,6 +41,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     packaging {
@@ -68,6 +70,7 @@ dependencies {
     implementation(libs.room)
     implementation(libs.room.ktx)
     implementation(libs.generativeai)
+    implementation(libs.secrets.gradle.plugin)
     ksp(libs.room.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
