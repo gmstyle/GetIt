@@ -11,7 +11,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,13 +32,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -56,8 +63,10 @@ fun ShoppingListScreen(
     val coroutineScope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val state by viewModel.state.collectAsState()
+    var id by remember { mutableIntStateOf(0) }
     var itemName by remember { mutableStateOf("") }
     var editableListName by remember { mutableStateOf("") }
+    var hasBeenFocused by remember { mutableStateOf(false) }
 
 
     LaunchedEffect(key1 = Unit) {
@@ -101,33 +110,58 @@ fun ShoppingListScreen(
 
     }) { innerPadding ->
         Column(
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier
+                .padding(innerPadding)
+                .padding(horizontal = 8.dp, vertical = 8.dp)
         ) {
             // Nome lista e pulsante di salvataggio
             Row {
                 TextField(
+                    modifier = Modifier
+                        .weight(1f)
+                        .onFocusChanged { focusState ->
+                           hasBeenFocused = hasBeenFocused || focusState.isFocused
+                           if (!focusState.isFocused && hasBeenFocused && editableListName.isNotEmpty()) {
+                               saveList(editableListName, state, editableListName, viewModel)
+                            }
+                        },
+                    leadingIcon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = null) },
                     value = editableListName,
                     onValueChange = { newName ->
                         editableListName = newName
-                    }
+                        //saveList(newName, state, editableListName, viewModel)
+                    },
+                    label = { Text("List name") },
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                Button(onClick = {
-                    val newList = when (state) {
-                        is ShoppingListState.Success -> {
-                            val list = (state as ShoppingListState.Success).listWithItems.list
-                            list.copy(name = editableListName)
-                        }
-                        else -> ShoppingList(name = editableListName)
-                    }
-
-                    if (state is ShoppingListState.Success) {
-                        viewModel.updateList(newList)
-                    } else {
-                        viewModel.saveList(newList)
-                    }
+               /* Spacer(modifier = Modifier.width(8.dp))
+                Button(
+                    enabled = editableListName.isNotEmpty(),
+                    onClick = {
+                        saveList(editableListName, state, editableListName, viewModel)
                 }) {
                     Text("Save")
+                }*/
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            // Riga per aggiungere un nuovo elemento alla lista
+            Row {
+                TextField(
+
+                    modifier = Modifier.weight(1f),
+                    value = itemName,
+                    onValueChange = { newName ->
+                        itemName = newName
+                    },
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                IconButton(
+                    enabled = id != 0 && itemName.isNotEmpty(),
+                    onClick = {
+                    val listItem = ListItem(listId = id, name = itemName)
+                    viewModel.saveItem(listItem)
+                    itemName = ""
+                }) {
+                    Icon(imageVector = Icons.Default.Add, contentDescription = null)
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -143,50 +177,71 @@ fun ShoppingListScreen(
 
                 is ShoppingListState.Success -> {
                     val listItems = (state as ShoppingListState.Success).listWithItems.items
-                    val id = (state as ShoppingListState.Success).listWithItems.list.id
+                    id = (state as ShoppingListState.Success).listWithItems.list.id
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        // Aggiungi un singolo elemento per l'aggiunta di un nuovo elemento
-                        item {
-                            Row {
-                                TextField(
-                                    modifier = Modifier.weight(1f),
-                                    value = itemName,
-                                    onValueChange = { newName ->
-                                        itemName = newName
-                                    },
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                IconButton(onClick = {
-                                    val listItem = ListItem(listId = id, name = itemName)
-                                    viewModel.saveItem(listItem)
-                                    itemName = ""
-                                }) {
-                                    Icon(imageVector = Icons.Default.Add, contentDescription = null)
-                                }
-                            }
-                        }
-
                         // Elenco esistente di elementi
                         items(listItems.reversed()) { item ->
                             Row {
                                 TextField(
                                     modifier = Modifier.weight(1f),
                                     value = item.name,
+                                    // quando item.completed mostra il testo sbarrato
+                                    // se non mostra nulla
+                                    enabled = !item.completed,
+                                    textStyle = if (item.completed)
+                                        MaterialTheme.typography.bodyLarge.copy(
+                                            textDecoration = TextDecoration.LineThrough
+                                        ) else MaterialTheme.typography.bodyLarge,
                                     onValueChange = { newName ->
-                                        viewModel.updateItem(item.copy(name = newName))
+                                        if (newName != item.name && newName.isNotEmpty()) {
+                                            viewModel.updateItem(item.copy(name = newName))
+                                        }
                                     },
+                                    leadingIcon = {
+                                        Checkbox(checked = item.completed, onCheckedChange = { isChecked ->
+                                            viewModel.updateItem(item.copy(completed = isChecked))
+                                        })
+                                    },
+                                    trailingIcon = {
+                                        IconButton(onClick = {
+                                            viewModel.deleteItem(item)
+                                        }) {
+                                            Icon(imageVector = Icons.Default.Close, contentDescription = null)
+                                        }
+                                    }
                                 )
-                                Checkbox(checked = item.completed, onCheckedChange = { isChecked ->
-                                    viewModel.updateItem(item.copy(completed = isChecked))
-                                })
                             }
                         }
                     }
                 }
                 else -> {}
             }
+        }
+    }
+}
+
+private fun saveList(
+    newName: String,
+    state: ShoppingListState,
+    editableListName: String,
+    viewModel: ShoppingListViewModel
+) {
+    if (newName.isNotEmpty()) {
+        val newList = when (state) {
+            is ShoppingListState.Success -> {
+                val list = (state as ShoppingListState.Success).listWithItems.list
+                list.copy(name = editableListName)
+            }
+
+            else -> ShoppingList(name = editableListName)
+        }
+
+        if (state is ShoppingListState.Success) {
+            viewModel.updateList(newList)
+        } else {
+            viewModel.saveList(newList)
         }
     }
 }
