@@ -1,4 +1,4 @@
-package it.gmstyle.getit.viewmodels
+package it.gmstyle.getit.viewmodels.shoppinglists
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

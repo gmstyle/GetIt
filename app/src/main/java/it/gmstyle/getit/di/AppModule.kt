@@ -5,8 +5,8 @@ import it.gmstyle.getit.data.ShoppingListDatabase
 import it.gmstyle.getit.data.dao.ListItemDao
 import it.gmstyle.getit.data.dao.ShoppingListDao
 import it.gmstyle.getit.data.repositories.ShoppingListRepository
-import it.gmstyle.getit.viewmodels.ShoppingListViewModel
-import it.gmstyle.getit.viewmodels.ShoppingListsViewModel
+import it.gmstyle.getit.viewmodels.shoppinglist.ShoppingListViewModel
+import it.gmstyle.getit.viewmodels.shoppinglists.ShoppingListsViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
@@ -31,7 +31,7 @@ val appModule = module {
 
     ///ViewModels
     viewModel<ShoppingListsViewModel> { ShoppingListsViewModel(get<ShoppingListRepository>()) }
-    viewModel<ShoppingListViewModel> { ShoppingListViewModel(get<ShoppingListRepository>())}
+    viewModel<ShoppingListViewModel> { ShoppingListViewModel(get<ShoppingListRepository>()) }
 
 
 }

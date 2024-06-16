@@ -1,6 +1,5 @@
 package it.gmstyle.getit.compose.screens
 
-import android.view.WindowId
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,15 +34,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import it.gmstyle.getit.compose.composables.CommonLoader
 import it.gmstyle.getit.data.entities.ListItem
 import it.gmstyle.getit.data.entities.ShoppingList
-import it.gmstyle.getit.viewmodels.ShoppingListState
-import it.gmstyle.getit.viewmodels.ShoppingListViewModel
+import it.gmstyle.getit.viewmodels.shoppinglist.ShoppingListState
+import it.gmstyle.getit.viewmodels.shoppinglist.ShoppingListViewModel
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
@@ -51,7 +50,7 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun ShoppingListScreen(
     navController: NavController,
-    listId: String,
+    listId: Int? = null,
     viewModel: ShoppingListViewModel = koinViewModel<ShoppingListViewModel>()
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -62,8 +61,8 @@ fun ShoppingListScreen(
 
 
     LaunchedEffect(key1 = Unit) {
-        if (listId != "0") {
-            viewModel.getShoppingListWithItems(listId.toInt())
+        listId?.let {
+            viewModel.getShoppingListWithItems(it)
         }
         // Osservo lo stato per aggiornare il nome della lista che viene visualizzato
         // quando viene cambiato il nome della lista il valore viene aggiornato correttamente
@@ -71,7 +70,7 @@ fun ShoppingListScreen(
             .collect {
                 if (it is ShoppingListState.Success) {
                     coroutineScope.launch {
-                        editableListName = it.data.list.name
+                        editableListName = it.listWithItems.list.name
                     }
                 }
             }
@@ -106,32 +105,36 @@ fun ShoppingListScreen(
         ) {
             // Nome lista e pulsante di salvataggio
             Row {
-                TextField(value = editableListName, onValueChange = { newListName ->
-                    editableListName = newListName
-                }, label = { Text("List Name") }, modifier = Modifier.weight(1f)
+                TextField(
+                    value = editableListName,
+                    onValueChange = { newName ->
+                        editableListName = newName
+                    }
                 )
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.height(8.dp))
                 Button(onClick = {
-                    if (listId != "0" && viewModel.newListId.intValue == 0) {
-                        viewModel.updateList(ShoppingList(listId.toInt(), editableListName))
-                    } else if (listId == "0" && viewModel.newListId.intValue == 0) {
-                        viewModel.saveList(ShoppingList(name = editableListName))
+                    val newList = when (state) {
+                        is ShoppingListState.Success -> {
+                            val list = (state as ShoppingListState.Success).listWithItems.list
+                            list.copy(name = editableListName)
+                        }
+                        else -> ShoppingList(name = editableListName)
+                    }
+
+                    if (state is ShoppingListState.Success) {
+                        viewModel.updateList(newList)
                     } else {
-                        viewModel.updateList(
-                            ShoppingList(
-                                viewModel.newListId.intValue,
-                                editableListName
-                            )
-                        )
+                        viewModel.saveList(newList)
                     }
                 }) {
                     Text("Save")
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
+            // Elementi della lista
             when (state) {
                 is ShoppingListState.Loading -> {
-                    Text("Loading...")
+                    CommonLoader()
                 }
 
                 is ShoppingListState.Error -> {
@@ -139,13 +142,13 @@ fun ShoppingListScreen(
                 }
 
                 is ShoppingListState.Success -> {
-                    val listItems = (state as ShoppingListState.Success).data.items
+                    val listItems = (state as ShoppingListState.Success).listWithItems.items
+                    val id = (state as ShoppingListState.Success).listWithItems.list.id
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         // Aggiungi un singolo elemento per l'aggiunta di un nuovo elemento
                         item {
-
                             Row {
                                 TextField(
                                     modifier = Modifier.weight(1f),
@@ -156,15 +159,7 @@ fun ShoppingListScreen(
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 IconButton(onClick = {
-                                    val listItem = if (listId != "0") {
-                                        ListItem(listId = listId.toInt(), name = itemName)
-
-                                    } else {
-                                        ListItem(
-                                            name = itemName,
-                                            listId = viewModel.newListId.intValue
-                                        )
-                                    }
+                                    val listItem = ListItem(listId = id, name = itemName)
                                     viewModel.saveItem(listItem)
                                     itemName = ""
                                 }) {

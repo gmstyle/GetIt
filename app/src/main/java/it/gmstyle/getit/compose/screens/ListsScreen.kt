@@ -25,7 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import it.gmstyle.getit.compose.composables.ShoppingListSticker
-import it.gmstyle.getit.viewmodels.ShoppingListsViewModel
+import it.gmstyle.getit.viewmodels.shoppinglists.ShoppingListsViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,6 +36,7 @@ fun ShoppingListsScreen(
 ) {
 
     val lists by viewModel.shoppingLists.collectAsState(initial = emptyList())
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -49,7 +50,8 @@ fun ShoppingListsScreen(
         floatingActionButton = {
             FloatingActionButton(onClick = {
                // navigo verso la schermata ListScreen per creare una nuova lista
-                navController.navigate("list/0")
+                val listId: Int? = null
+                navController.navigate("list/$listId")
 
             }) {
                 Row(
