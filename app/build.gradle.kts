@@ -67,6 +67,7 @@ dependencies {
     implementation(libs.koin.androidx.compose)
     implementation(libs.room)
     implementation(libs.room.ktx)
+    implementation(libs.generativeai)
     ksp(libs.room.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
