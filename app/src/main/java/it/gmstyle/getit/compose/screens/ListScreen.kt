@@ -56,7 +56,7 @@ fun ShoppingListScreen(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
-    val state = viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsState()
     var itemName by remember { mutableStateOf("") }
     var editableListName by remember { mutableStateOf("") }
 
@@ -67,7 +67,7 @@ fun ShoppingListScreen(
         }
         // Osservo lo stato per aggiornare il nome della lista che viene visualizzato
         // quando viene cambiato il nome della lista il valore viene aggiornato correttamente
-        snapshotFlow { state.value }
+        snapshotFlow { state }
             .collect {
                 if (it is ShoppingListState.Success) {
                     coroutineScope.launch {
@@ -129,17 +129,17 @@ fun ShoppingListScreen(
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
-            when (state.value) {
+            when (state) {
                 is ShoppingListState.Loading -> {
                     Text("Loading...")
                 }
 
                 is ShoppingListState.Error -> {
-                    Text((state.value as ShoppingListState.Error).message)
+                    Text((state as ShoppingListState.Error).message)
                 }
 
                 is ShoppingListState.Success -> {
-                    val listItems = (state.value as ShoppingListState.Success).data.items
+                    val listItems = (state as ShoppingListState.Success).data.items
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
