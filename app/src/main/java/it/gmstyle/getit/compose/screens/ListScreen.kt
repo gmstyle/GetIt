@@ -228,7 +228,7 @@ private fun saveList(
     if (newName.isNotEmpty()) {
         val newList = when (state) {
             is ShoppingListUiState.Success -> {
-                val list = (state as ShoppingListUiState.Success).listWithItems.list
+                val list = state.listWithItems.list
                 list.copy(name = editableListName)
             }
 
