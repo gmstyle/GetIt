@@ -13,20 +13,20 @@ import kotlinx.coroutines.launch
 
 class ShoppingListViewModel(private val repository: ShoppingListRepository) : ViewModel() {
 
-    private val _state = MutableStateFlow<ShoppingListState>(ShoppingListState.Initial)
-    val state get() = _state.asStateFlow()
+    private val _uiState = MutableStateFlow<ShoppingListUiState>(ShoppingListUiState.Initial)
+    val uiState get() = _uiState.asStateFlow()
 
     fun getShoppingListWithItems(listId: Int) {
         viewModelScope.launch {
             repository.getListById(listId)
                 .onStart {
-                    _state.value = ShoppingListState.Loading
+                    _uiState.value = ShoppingListUiState.Loading
                 }.catch {
-                    _state.value =
-                        ShoppingListState.Error(it.message ?: "An unexpected error occurred")
+                    _uiState.value =
+                        ShoppingListUiState.Error(it.message ?: "An unexpected error occurred")
                 }
                 .collect {
-                    _state.value = ShoppingListState.Success(it)
+                    _uiState.value = ShoppingListUiState.Success(it)
                 }
         }
     }

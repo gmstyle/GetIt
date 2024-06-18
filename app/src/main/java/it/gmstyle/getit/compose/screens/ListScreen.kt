@@ -13,10 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -48,7 +45,7 @@ import androidx.navigation.NavController
 import it.gmstyle.getit.compose.composables.CommonLoader
 import it.gmstyle.getit.data.entities.ListItem
 import it.gmstyle.getit.data.entities.ShoppingList
-import it.gmstyle.getit.viewmodels.shoppinglist.ShoppingListState
+import it.gmstyle.getit.viewmodels.shoppinglist.ShoppingListUiState
 import it.gmstyle.getit.viewmodels.shoppinglist.ShoppingListViewModel
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -62,7 +59,7 @@ fun ShoppingListScreen(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
-    val state by viewModel.state.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
     var id by remember { mutableIntStateOf(0) }
     var itemName by remember { mutableStateOf("") }
     var editableListName by remember { mutableStateOf("") }
@@ -75,9 +72,9 @@ fun ShoppingListScreen(
         }
         // Osservo lo stato per aggiornare il nome della lista che viene visualizzato
         // quando viene cambiato il nome della lista il valore viene aggiornato correttamente
-        snapshotFlow { state }
+        snapshotFlow { uiState }
             .collect {
-                if (it is ShoppingListState.Success) {
+                if (it is ShoppingListUiState.Success) {
                     coroutineScope.launch {
                         editableListName = it.listWithItems.list.name
                     }
@@ -122,7 +119,7 @@ fun ShoppingListScreen(
                         .onFocusChanged { focusState ->
                            hasBeenFocused = hasBeenFocused || focusState.isFocused
                            if (!focusState.isFocused && hasBeenFocused && editableListName.isNotEmpty()) {
-                               saveList(editableListName, state, editableListName, viewModel)
+                               saveList(editableListName, uiState, editableListName, viewModel)
                             }
                         },
                     leadingIcon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = null) },
@@ -166,18 +163,18 @@ fun ShoppingListScreen(
             }
             Spacer(modifier = Modifier.height(16.dp))
             // Elementi della lista
-            when (state) {
-                is ShoppingListState.Loading -> {
+            when (uiState) {
+                is ShoppingListUiState.Loading -> {
                     CommonLoader()
                 }
 
-                is ShoppingListState.Error -> {
-                    Text((state as ShoppingListState.Error).message)
+                is ShoppingListUiState.Error -> {
+                    Text((uiState as ShoppingListUiState.Error).message)
                 }
 
-                is ShoppingListState.Success -> {
-                    val listItems = (state as ShoppingListState.Success).listWithItems.items
-                    id = (state as ShoppingListState.Success).listWithItems.list.id
+                is ShoppingListUiState.Success -> {
+                    val listItems = (uiState as ShoppingListUiState.Success).listWithItems.items
+                    id = (uiState as ShoppingListUiState.Success).listWithItems.list.id
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
@@ -224,21 +221,21 @@ fun ShoppingListScreen(
 
 private fun saveList(
     newName: String,
-    state: ShoppingListState,
+    state: ShoppingListUiState,
     editableListName: String,
     viewModel: ShoppingListViewModel
 ) {
     if (newName.isNotEmpty()) {
         val newList = when (state) {
-            is ShoppingListState.Success -> {
-                val list = (state as ShoppingListState.Success).listWithItems.list
+            is ShoppingListUiState.Success -> {
+                val list = (state as ShoppingListUiState.Success).listWithItems.list
                 list.copy(name = editableListName)
             }
 
             else -> ShoppingList(name = editableListName)
         }
 
-        if (state is ShoppingListState.Success) {
+        if (state is ShoppingListUiState.Success) {
             viewModel.updateList(newList)
         } else {
             viewModel.saveList(newList)
