@@ -5,6 +5,9 @@ import com.google.ai.client.generativeai.type.GenerateContentResponse
 import com.google.ai.client.generativeai.type.content
 import com.google.ai.client.generativeai.type.generationConfig
 import it.gmstyle.getit.BuildConfig
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
 
 class ChatRepository {
 
@@ -45,6 +48,9 @@ class ChatRepository {
 
     private val chat = generativeModel.startChat(chatHistory)
 
+    /*fun sendMessage(message: String): Flow<GenerateContentResponse> {
+        return chat.sendMessageStream(message).flowOn(Dispatchers.IO)
+    }*/
     suspend fun sendMessage(message: String): GenerateContentResponse {
         return chat.sendMessage(message)
     }

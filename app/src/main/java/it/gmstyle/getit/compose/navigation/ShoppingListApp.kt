@@ -4,9 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import it.gmstyle.getit.compose.screens.ChatScreen
-import it.gmstyle.getit.compose.screens.ShoppingListScreen
-import it.gmstyle.getit.compose.screens.ShoppingListsScreen
+import it.gmstyle.getit.compose.screens.chatscreen.ChatScreen
+import it.gmstyle.getit.compose.screens.listscreen.ShoppingListScreen
+import it.gmstyle.getit.compose.screens.listsscreen.ShoppingListsScreen
 import org.koin.compose.KoinContext
 
 @Composable

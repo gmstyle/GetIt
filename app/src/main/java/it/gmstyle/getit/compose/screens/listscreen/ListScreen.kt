@@ -1,4 +1,4 @@
-package it.gmstyle.getit.compose.screens
+package it.gmstyle.getit.compose.screens.listscreen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,10 +12,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -82,7 +84,8 @@ fun ShoppingListScreen(
             }
     }
 
-    Scaffold(modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection), topBar = {
+    Scaffold(modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        topBar = {
         MediumTopAppBar(colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
             titleContentColor = MaterialTheme.colorScheme.primary,
@@ -104,8 +107,16 @@ fun ShoppingListScreen(
             }, scrollBehavior = scrollBehavior
 
         )
-
-    }) { innerPadding ->
+    },
+        floatingActionButton = {
+            // val alla schermata chat
+            FloatingActionButton(
+                onClick = { navController.navigate("chat") }
+            ) {
+                Icon(imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = "Chat")
+            }
+        }
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -117,9 +128,9 @@ fun ShoppingListScreen(
                     modifier = Modifier
                         .weight(1f)
                         .onFocusChanged { focusState ->
-                           hasBeenFocused = hasBeenFocused || focusState.isFocused
-                           if (!focusState.isFocused && hasBeenFocused && editableListName.isNotEmpty()) {
-                               saveList(editableListName, uiState, editableListName, viewModel)
+                            hasBeenFocused = hasBeenFocused || focusState.isFocused
+                            if (!focusState.isFocused && hasBeenFocused && editableListName.isNotEmpty()) {
+                                saveList(editableListName, uiState, editableListName, viewModel)
                             }
                         },
                     leadingIcon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = null) },

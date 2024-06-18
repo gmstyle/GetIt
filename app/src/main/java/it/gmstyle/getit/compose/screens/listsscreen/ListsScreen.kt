@@ -1,4 +1,4 @@
-package it.gmstyle.getit.compose.screens
+package it.gmstyle.getit.compose.screens.listsscreen
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
