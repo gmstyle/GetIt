@@ -68,7 +68,7 @@ fun MessageBubble(
            Text(text = message.message)
             Spacer(modifier = Modifier.padding(4.dp))
             Row(
-                modifier = Modifier.fillMaxWidth(),
+               // modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
             ) {
                 Text(
@@ -100,7 +100,7 @@ fun ChatItemPreview() {
         )
         MessageBubble(
             message = ChatMessage(
-                message = "Ciao! Tutto bene, grazie!",
+                message = "Ciao! Tutto bene, grazie!, hai bisogno di aiuto? Posso aiutarti a creare una lista della spesa",
                 isUser = false
             )
         )
