@@ -40,10 +40,12 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import it.gmstyle.getit.R
 import it.gmstyle.getit.compose.composables.CommonLoader
 import it.gmstyle.getit.data.entities.ListItem
 import it.gmstyle.getit.data.entities.ShoppingList
@@ -113,7 +115,9 @@ fun ShoppingListScreen(
             FloatingActionButton(
                 onClick = { navController.navigate("chat") }
             ) {
-                Icon(imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = "Chat")
+                Icon(
+                    painterResource(id = R.drawable.baseline_assistant_24) ,
+                    contentDescription = "Chat")
             }
         }
     ) { innerPadding ->
