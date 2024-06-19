@@ -118,6 +118,7 @@ fun ChatScreen(
                 IconButton(
                     onClick = {
                         viewModel.sendMessage(ChatMessage(prompt, true))
+                        prompt = ""
                     })
                 {
                     Icon(imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = "" )

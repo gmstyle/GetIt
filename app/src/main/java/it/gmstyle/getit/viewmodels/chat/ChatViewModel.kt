@@ -17,22 +17,31 @@ class ChatViewModel(private val chatRepository: ChatRepository) : ViewModel() {
     private val _chatHistory = mutableListOf<ChatMessage>()
 
     fun sendMessage(chatPrompt: ChatMessage) {
-        _chatHistory += chatPrompt
+        _chatHistory.add(chatPrompt)
+        _uiState.value = ChatUiState.Success(_chatHistory)
 
         viewModelScope.launch {
             _uiState.value = ChatUiState.Loading
             try {
-                val generativeResponse = chatRepository.sendMessage(chatPrompt.message)
+                /*val generativeResponse = chatRepository.sendMessage(chatPrompt.message)
                 generativeResponse.text?.let { outputContent ->
                     val chatResponse = ChatMessage(
                         message = outputContent,
                         isUser = false
                     )
-                    _chatHistory += chatResponse
+                    _chatHistory.add(chatResponse)
                     _uiState.value = ChatUiState.Success(_chatHistory)
                 } ?: run {
                     _uiState.value = ChatUiState.Error("No text generated")
-                }
+                }*/
+
+                val chatResponse = ChatMessage(
+                    message = "Mocked response from the model",
+                    isUser = false
+                )
+                _chatHistory.add(chatResponse)
+                _uiState.value = ChatUiState.Success(_chatHistory.reversed())
+
             } catch (e: Exception) {
                 _uiState.value = ChatUiState.Error(e.message ?: "An unexpected error occurred")
             }
