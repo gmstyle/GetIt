@@ -13,7 +13,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,12 +30,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import it.gmstyle.getit.data.models.ChatMessage
-import it.gmstyle.getit.viewmodels.chat.ChatUiState
 import it.gmstyle.getit.viewmodels.chat.ChatViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -46,7 +42,7 @@ fun ChatScreen(
     navController: NavController,
     viewModel: ChatViewModel = koinViewModel<ChatViewModel>()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val chatHistory by viewModel.chatHistory.collectAsState()
     var prompt by rememberSaveable { mutableStateOf("") }
 
     Scaffold(
@@ -76,7 +72,7 @@ fun ChatScreen(
                 modifier = Modifier.weight(1f),
                 reverseLayout =  true
             ) {
-                val chatHistoryReversed = uiState.chatHistory.reversed()
+                val chatHistoryReversed = chatHistory.reversed()
                 items(chatHistoryReversed) { chatMessage ->
                     MessageBubble(chatMessage)
                 }
