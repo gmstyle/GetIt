@@ -12,38 +12,47 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
 class ChatViewModel(private val chatRepository: ChatRepository) : ViewModel() {
-    private val _uiState: MutableStateFlow<ChatUiState> = MutableStateFlow(ChatUiState.Initial)
+    private val _uiState: MutableStateFlow<ChatUiState> = MutableStateFlow(ChatUiState.Initial())
     val uiState: StateFlow<ChatUiState> get()= _uiState.asStateFlow()
     private val _chatHistory = mutableListOf<ChatMessage>()
+    private val loadingMessage = ChatMessage("...", false)
 
     fun sendMessage(chatPrompt: ChatMessage) {
-        _chatHistory.add(chatPrompt)
-        _uiState.value = ChatUiState.Success(_chatHistory)
+
 
         viewModelScope.launch {
-            _uiState.value = ChatUiState.Loading
+            _chatHistory.add(chatPrompt)
+           _chatHistory.add(loadingMessage)
+            _uiState.value = ChatUiState.Loading(_chatHistory)
             try {
-                /*val generativeResponse = chatRepository.sendMessage(chatPrompt.message)
+                val generativeResponse = chatRepository.sendMessage(chatPrompt.message)
                 generativeResponse.text?.let { outputContent ->
                     val chatResponse = ChatMessage(
                         message = outputContent,
                         isUser = false
                     )
+                    _chatHistory.remove(loadingMessage)
                     _chatHistory.add(chatResponse)
                     _uiState.value = ChatUiState.Success(_chatHistory)
                 } ?: run {
-                    _uiState.value = ChatUiState.Error("No text generated")
-                }*/
+                    _chatHistory.remove(loadingMessage)
+                    _chatHistory.add(ChatMessage("No text generated", false))
+                    _uiState.value = ChatUiState.Error(_chatHistory)
+                }
 
-                val chatResponse = ChatMessage(
+                /*val chatResponse = ChatMessage(
                     message = "Mocked response from the model",
                     isUser = false
                 )
+                _chatHistory.remove(loadingMessage)
                 _chatHistory.add(chatResponse)
-                _uiState.value = ChatUiState.Success(_chatHistory.reversed())
+                _uiState.value = ChatUiState.Success(_chatHistory)*/
 
             } catch (e: Exception) {
-                _uiState.value = ChatUiState.Error(e.message ?: "An unexpected error occurred")
+               val errorMessage = e.message ?: "An unexpected error occurred"
+                _chatHistory.remove(loadingMessage)
+                _chatHistory.add(ChatMessage(errorMessage, false))
+                _uiState.value = ChatUiState.Error(_chatHistory)
             }
         }
     }

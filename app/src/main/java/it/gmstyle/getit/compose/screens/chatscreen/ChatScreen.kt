@@ -76,28 +76,10 @@ fun ChatScreen(
                 modifier = Modifier.weight(1f),
                 reverseLayout =  true
             ) {
-              when(uiState) {
-                    is ChatUiState.Loading -> {
-                        item {
-                            MessageBubble(message = ChatMessage("...", false))
-                        }
-                    }
-                    is ChatUiState.Error -> {
-                        val errorMessage = (uiState as ChatUiState.Error).errorMessage
-                        item {
-                            MessageBubble(message = ChatMessage(errorMessage, false))
-                        }
-                    }
-                    is ChatUiState.Success -> {
-                        val chatHistory = (uiState as ChatUiState.Success).chatHistory
-                        items(chatHistory) { chatMessage ->
-                            MessageBubble(message = chatMessage)
-                        }
-                    }
-                    else -> {
-                        item { }
-                    }
-              }
+                val chatHistoryReversed = uiState.chatHistory.reversed()
+                items(chatHistoryReversed) { chatMessage ->
+                    MessageBubble(chatMessage)
+                }
             }
 
             Row(
