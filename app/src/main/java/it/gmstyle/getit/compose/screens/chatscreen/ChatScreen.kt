@@ -1,8 +1,13 @@
 package it.gmstyle.getit.compose.screens.chatscreen
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContent
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -35,6 +40,7 @@ fun ChatScreen(
     val chatHistory by viewModel.chatHistory.collectAsState()
 
     Scaffold(
+        contentWindowInsets = WindowInsets.ime,
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(

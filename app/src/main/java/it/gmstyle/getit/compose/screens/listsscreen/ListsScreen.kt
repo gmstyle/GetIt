@@ -2,7 +2,9 @@ package it.gmstyle.getit.compose.screens.listsscreen
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -41,6 +43,7 @@ fun ShoppingListsScreen(
     val lists by viewModel.shoppingLists.collectAsState(initial = emptyList())
 
     Scaffold(
+        contentWindowInsets = WindowInsets.ime,
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -62,7 +65,6 @@ fun ShoppingListsScreen(
                 })
         }
     ) { padding ->
-
 
         Column(
             modifier = Modifier

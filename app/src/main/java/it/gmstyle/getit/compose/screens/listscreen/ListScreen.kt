@@ -4,8 +4,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -19,6 +22,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
@@ -83,7 +87,9 @@ fun ShoppingListScreen(
             }
     }
 
-    Scaffold(modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+    Scaffold(
+        contentWindowInsets = WindowInsets.ime,
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             MediumTopAppBar(colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -125,7 +131,8 @@ fun ShoppingListScreen(
         Column(
             modifier = Modifier
                 .padding(innerPadding)
-                .padding(horizontal = 8.dp, vertical = 8.dp)
+                .padding(horizontal = 8.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Nome lista e pulsante di salvataggio
             ListNameBox(
@@ -136,7 +143,6 @@ fun ShoppingListScreen(
                 }
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
             // Riga per aggiungere un nuovo elemento alla lista
             NewItemBox(
                 enabled = id != 0
@@ -145,7 +151,6 @@ fun ShoppingListScreen(
                 viewModel.saveItem(listItem)
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
             // Elementi della lista
             when (uiState) {
                 is ShoppingListUiState.Loading -> {
@@ -161,9 +166,10 @@ fun ShoppingListScreen(
                     id = (uiState as ShoppingListUiState.Success).listWithItems.list.id
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
+                        reverseLayout = true
                     ) {
                         // Elenco esistente di elementi
-                        items(listItems.reversed()) { item ->
+                        items(listItems) { item ->
                             ItemBox(
                                 item = item,
                                 onUpdateItem = viewModel::updateItem,
