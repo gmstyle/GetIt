@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -45,7 +46,8 @@ fun InputBox(
         )
         Spacer(modifier = Modifier.width(8.dp))
         // send button
-        IconButton(
+        FilledIconButton(
+            enabled = prompt.isNotBlank(),
             onClick = {
                 onSend(ChatMessage(prompt, true))
                 prompt = ""

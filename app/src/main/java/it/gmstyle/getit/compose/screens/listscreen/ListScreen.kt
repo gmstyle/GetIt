@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -179,7 +180,7 @@ fun ShoppingListScreen(
                     },
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                IconButton(
+                FilledIconButton(
                     enabled = id != 0 && itemName.isNotEmpty(),
                     onClick = {
                         val listItem = ListItem(listId = id, name = itemName)
