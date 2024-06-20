@@ -166,7 +166,7 @@ fun ShoppingListScreen(
                     id = (uiState as ShoppingListUiState.Success).listWithItems.list.id
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
-                        reverseLayout = true
+                       // reverseLayout = true
                     ) {
                         // Elenco esistente di elementi
                         items(listItems) { item ->
