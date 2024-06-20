@@ -12,7 +12,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import it.gmstyle.getit.compose.composables.commons.CommonTextField
 import it.gmstyle.getit.data.models.ChatMessage
 
 @Composable
@@ -37,11 +37,11 @@ fun InputBox(
             .background(MaterialTheme.colorScheme.surface)
             .padding(8.dp)
     ) {
-        TextField(
+        CommonTextField(
             value = prompt,
             onValueChange = { prompt = it },
             modifier = Modifier.weight(1f),
-            placeholder = { Text("Type a message") }
+            placeholder = { Text("Type a message") },
         )
         Spacer(modifier = Modifier.width(8.dp))
         // send button

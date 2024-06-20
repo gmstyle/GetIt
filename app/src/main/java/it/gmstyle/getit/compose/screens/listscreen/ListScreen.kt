@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
@@ -24,6 +25,7 @@ import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
@@ -38,6 +40,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextDecoration
@@ -46,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import it.gmstyle.getit.R
 import it.gmstyle.getit.compose.composables.commons.CommonLoader
+import it.gmstyle.getit.compose.composables.commons.CommonTextField
 import it.gmstyle.getit.data.entities.ListItem
 import it.gmstyle.getit.data.entities.ShoppingList
 import it.gmstyle.getit.viewmodels.shoppinglist.ShoppingListUiState
@@ -87,36 +91,37 @@ fun ShoppingListScreen(
 
     Scaffold(modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-        MediumTopAppBar(colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            titleContentColor = MaterialTheme.colorScheme.primary,
-            navigationIconContentColor = MaterialTheme.colorScheme.primary
-        ),
-            title = {
-                Text(
-                    editableListName.ifEmpty { "New List" }, overflow = TextOverflow.Ellipsis
-                )
-            }, navigationIcon = {
-                IconButton(
-                    onClick = {
-                        navController.popBackStack()
-                    },
-                    content = {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    },
-                )
-            }, scrollBehavior = scrollBehavior
+            MediumTopAppBar(colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                titleContentColor = MaterialTheme.colorScheme.primary,
+                navigationIconContentColor = MaterialTheme.colorScheme.primary
+            ),
+                title = {
+                    Text(
+                        editableListName.ifEmpty { "New List" }, overflow = TextOverflow.Ellipsis
+                    )
+                }, navigationIcon = {
+                    IconButton(
+                        onClick = {
+                            navController.popBackStack()
+                        },
+                        content = {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        },
+                    )
+                }, scrollBehavior = scrollBehavior
 
-        )
-    },
+            )
+        },
         floatingActionButton = {
             // val alla schermata chat
             FloatingActionButton(
                 onClick = { navController.navigate("chat") }
             ) {
                 Icon(
-                    painterResource(id = R.drawable.baseline_assistant_24) ,
-                    contentDescription = "Chat")
+                    painterResource(id = R.drawable.baseline_assistant_24),
+                    contentDescription = "Chat"
+                )
             }
         }
     ) { innerPadding ->
@@ -136,28 +141,37 @@ fun ShoppingListScreen(
                                 saveList(editableListName, uiState, editableListName, viewModel)
                             }
                         },
-                    leadingIcon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = null) },
+                    leadingIcon = {
+                        Icon(
+                            Icons.AutoMirrored.Filled.List,
+                            contentDescription = null
+                        )
+                    },
                     value = editableListName,
                     onValueChange = { newName ->
                         editableListName = newName
                         //saveList(newName, state, editableListName, viewModel)
                     },
                     label = { Text("List name") },
+                    shape = RoundedCornerShape(8.dp),
+                    colors = TextFieldDefaults.colors(
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent
+                    )
                 )
-               /* Spacer(modifier = Modifier.width(8.dp))
-                Button(
-                    enabled = editableListName.isNotEmpty(),
-                    onClick = {
-                        saveList(editableListName, state, editableListName, viewModel)
-                }) {
-                    Text("Save")
-                }*/
+                /* Spacer(modifier = Modifier.width(8.dp))
+                 Button(
+                     enabled = editableListName.isNotEmpty(),
+                     onClick = {
+                         saveList(editableListName, state, editableListName, viewModel)
+                 }) {
+                     Text("Save")
+                 }*/
             }
             Spacer(modifier = Modifier.height(16.dp))
             // Riga per aggiungere un nuovo elemento alla lista
             Row {
-                TextField(
-
+                CommonTextField(
                     modifier = Modifier.weight(1f),
                     value = itemName,
                     onValueChange = { newName ->
@@ -168,10 +182,10 @@ fun ShoppingListScreen(
                 IconButton(
                     enabled = id != 0 && itemName.isNotEmpty(),
                     onClick = {
-                    val listItem = ListItem(listId = id, name = itemName)
-                    viewModel.saveItem(listItem)
-                    itemName = ""
-                }) {
+                        val listItem = ListItem(listId = id, name = itemName)
+                        viewModel.saveItem(listItem)
+                        itemName = ""
+                    }) {
                     Icon(imageVector = Icons.Default.Add, contentDescription = null)
                 }
             }
@@ -195,7 +209,7 @@ fun ShoppingListScreen(
                         // Elenco esistente di elementi
                         items(listItems.reversed()) { item ->
                             Row {
-                                TextField(
+                                CommonTextField(
                                     modifier = Modifier.weight(1f),
                                     value = item.name,
                                     // quando item.completed mostra il testo sbarrato
@@ -211,22 +225,28 @@ fun ShoppingListScreen(
                                         }
                                     },
                                     leadingIcon = {
-                                        Checkbox(checked = item.completed, onCheckedChange = { isChecked ->
-                                            viewModel.updateItem(item.copy(completed = isChecked))
-                                        })
+                                        Checkbox(
+                                            checked = item.completed,
+                                            onCheckedChange = { isChecked ->
+                                                viewModel.updateItem(item.copy(completed = isChecked))
+                                            })
                                     },
                                     trailingIcon = {
                                         IconButton(onClick = {
                                             viewModel.deleteItem(item)
                                         }) {
-                                            Icon(imageVector = Icons.Default.Close, contentDescription = null)
+                                            Icon(
+                                                imageVector = Icons.Default.Close,
+                                                contentDescription = null
+                                            )
                                         }
-                                    }
+                                    },
                                 )
                             }
                         }
                     }
                 }
+
                 else -> {}
             }
         }
