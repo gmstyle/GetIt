@@ -6,18 +6,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -25,8 +19,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
@@ -41,16 +33,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import it.gmstyle.getit.R
 import it.gmstyle.getit.compose.composables.commons.CommonLoader
 import it.gmstyle.getit.compose.composables.commons.CommonTextField
+import it.gmstyle.getit.compose.screens.listscreen.composables.ItemBox
+import it.gmstyle.getit.compose.screens.listscreen.composables.ListNameBox
+import it.gmstyle.getit.compose.screens.listscreen.composables.NewItemBox
 import it.gmstyle.getit.data.entities.ListItem
 import it.gmstyle.getit.data.entities.ShoppingList
 import it.gmstyle.getit.viewmodels.shoppinglist.ShoppingListUiState
@@ -69,7 +62,6 @@ fun ShoppingListScreen(
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val uiState by viewModel.uiState.collectAsState()
     var id by remember { mutableIntStateOf(0) }
-    var itemName by remember { mutableStateOf("") }
     var editableListName by remember { mutableStateOf("") }
     var hasBeenFocused by remember { mutableStateOf(false) }
 
@@ -133,7 +125,7 @@ fun ShoppingListScreen(
         ) {
             // Nome lista e pulsante di salvataggio
             Row {
-                TextField(
+                CommonTextField(
                     modifier = Modifier
                         .weight(1f)
                         .onFocusChanged { focusState ->
@@ -151,45 +143,20 @@ fun ShoppingListScreen(
                     value = editableListName,
                     onValueChange = { newName ->
                         editableListName = newName
-                        //saveList(newName, state, editableListName, viewModel)
                     },
                     label = { Text("List name") },
-                    shape = RoundedCornerShape(8.dp),
-                    colors = TextFieldDefaults.colors(
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
-                    )
+
                 )
-                /* Spacer(modifier = Modifier.width(8.dp))
-                 Button(
-                     enabled = editableListName.isNotEmpty(),
-                     onClick = {
-                         saveList(editableListName, state, editableListName, viewModel)
-                 }) {
-                     Text("Save")
-                 }*/
             }
             Spacer(modifier = Modifier.height(16.dp))
             // Riga per aggiungere un nuovo elemento alla lista
-            Row {
-                CommonTextField(
-                    modifier = Modifier.weight(1f),
-                    value = itemName,
-                    onValueChange = { newName ->
-                        itemName = newName
-                    },
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                FilledIconButton(
-                    enabled = id != 0 && itemName.isNotEmpty(),
-                    onClick = {
-                        val listItem = ListItem(listId = id, name = itemName)
-                        viewModel.saveItem(listItem)
-                        itemName = ""
-                    }) {
-                    Icon(imageVector = Icons.Default.Add, contentDescription = null)
-                }
+            NewItemBox(
+                enabled = id != 0
+            ) { itemName ->
+                val listItem = ListItem(listId = id, name = itemName)
+                viewModel.saveItem(listItem)
             }
+
             Spacer(modifier = Modifier.height(16.dp))
             // Elementi della lista
             when (uiState) {
@@ -209,41 +176,11 @@ fun ShoppingListScreen(
                     ) {
                         // Elenco esistente di elementi
                         items(listItems.reversed()) { item ->
-                            Row {
-                                CommonTextField(
-                                    modifier = Modifier.weight(1f),
-                                    value = item.name,
-                                    // quando item.completed mostra il testo sbarrato
-                                    // se non mostra nulla
-                                    enabled = !item.completed,
-                                    textStyle = if (item.completed)
-                                        MaterialTheme.typography.bodyLarge.copy(
-                                            textDecoration = TextDecoration.LineThrough
-                                        ) else MaterialTheme.typography.bodyLarge,
-                                    onValueChange = { newName ->
-                                        if (newName != item.name && newName.isNotEmpty()) {
-                                            viewModel.updateItem(item.copy(name = newName))
-                                        }
-                                    },
-                                    leadingIcon = {
-                                        Checkbox(
-                                            checked = item.completed,
-                                            onCheckedChange = { isChecked ->
-                                                viewModel.updateItem(item.copy(completed = isChecked))
-                                            })
-                                    },
-                                    trailingIcon = {
-                                        IconButton(onClick = {
-                                            viewModel.deleteItem(item)
-                                        }) {
-                                            Icon(
-                                                imageVector = Icons.Default.Close,
-                                                contentDescription = null
-                                            )
-                                        }
-                                    },
-                                )
-                            }
+                          ItemBox(
+                              item = item,
+                              onUpdateItem = viewModel::updateItem,
+                              onDelete = viewModel::deleteItem
+                          )
                         }
                     }
                 }
