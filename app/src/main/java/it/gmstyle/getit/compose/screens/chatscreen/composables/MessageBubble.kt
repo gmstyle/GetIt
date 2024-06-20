@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import it.gmstyle.getit.R
@@ -82,21 +83,33 @@ fun MessageBubble(
            Text(text = message.message)
             Spacer(modifier = Modifier.padding(4.dp))
             if (isUserMessage) {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = "",
-                    modifier = Modifier
-                        .size(18.dp)
-                        .align(Alignment.End)
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "",
+                        modifier = Modifier
+                            .size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.padding(2.dp))
+                    Text(text = stringResource(id =R.string.placeholder_user))
+                }
             } else {
-                Icon(
-                    painter = painterResource(id = R.drawable.baseline_assistant_24),
-                    contentDescription = "",
-                    modifier = Modifier
-                        .size(18.dp)
-                        .align(Alignment.Start)
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start,
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_assistant_24),
+                        contentDescription = "",
+                        modifier = Modifier
+                            .size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.padding(2.dp))
+                    Text(text = stringResource(id = R.string.placeholder_ai_assistant))
+                }
             }
         }
 

@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -22,8 +23,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import it.gmstyle.getit.R
 import it.gmstyle.getit.compose.screens.listsscreen.composables.ShoppingListSticker
 import it.gmstyle.getit.viewmodels.shoppinglists.ShoppingListsViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -44,25 +47,19 @@ fun ShoppingListsScreen(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
-                title = { Text(text = "GetIt!")}
+                title = { Text(text = "GetIt!") }
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = {
-               // navigo verso la schermata ListScreen per creare una nuova lista
-                val listId: Int? = null
-                navController.navigate("list/$listId")
+            ExtendedFloatingActionButton(
+                text = { Text(stringResource(id = R.string.button_label_create_list)) },
+                icon = { Icon(imageVector = Icons.Filled.Add, contentDescription = "") },
+                onClick = {
+                    // navigo verso la schermata ListScreen per creare una nuova lista
+                    val listId: Int? = null
+                    navController.navigate("list/$listId")
 
-            }) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(imageVector = Icons.Filled.Add, contentDescription = "")
-                    Text("Add List")
-                }
-
-            }
+                })
         }
     ) { padding ->
 

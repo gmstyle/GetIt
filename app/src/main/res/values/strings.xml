@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Get It!</string>
+<!--Placeholders-->
+    <string name="placeholder_list_name">Your list name</string>
+    <string name="placeholder_ai_assistant">Ai Assistant</string>">
+    <string name="placeholder_user">You</string>">
+<!--    Button labels-->
+    <string name="button_label_create_list">New list</string>
+    <string name="button_label_ai_assistant">Ai Assistant</string>">
 </resources>

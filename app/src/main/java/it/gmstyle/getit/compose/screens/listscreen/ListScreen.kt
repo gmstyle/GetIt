@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -63,7 +65,6 @@ fun ShoppingListScreen(
     val uiState by viewModel.uiState.collectAsState()
     var id by remember { mutableIntStateOf(0) }
     var editableListName by remember { mutableStateOf("") }
-    var hasBeenFocused by remember { mutableStateOf(false) }
 
 
     LaunchedEffect(key1 = Unit) {
@@ -91,7 +92,8 @@ fun ShoppingListScreen(
             ),
                 title = {
                     Text(
-                        editableListName.ifEmpty { "New List" }, overflow = TextOverflow.Ellipsis
+                        editableListName.ifEmpty { stringResource(id = R.string.placeholder_list_name) },
+                        overflow = TextOverflow.Ellipsis
                     )
                 }, navigationIcon = {
                     IconButton(
@@ -108,14 +110,16 @@ fun ShoppingListScreen(
         },
         floatingActionButton = {
             // val alla schermata chat
-            FloatingActionButton(
+            ExtendedFloatingActionButton(
+                text = { Text(stringResource(id = R.string.button_label_ai_assistant)) },
+                icon = {
+                    Icon(
+                        painterResource(id = R.drawable.baseline_assistant_24),
+                        contentDescription = "Chat"
+                    )
+                },
                 onClick = { navController.navigate("chat") }
-            ) {
-                Icon(
-                    painterResource(id = R.drawable.baseline_assistant_24),
-                    contentDescription = "Chat"
-                )
-            }
+            )
         }
     ) { innerPadding ->
         Column(
@@ -124,30 +128,14 @@ fun ShoppingListScreen(
                 .padding(horizontal = 8.dp, vertical = 8.dp)
         ) {
             // Nome lista e pulsante di salvataggio
-            Row {
-                CommonTextField(
-                    modifier = Modifier
-                        .weight(1f)
-                        .onFocusChanged { focusState ->
-                            hasBeenFocused = hasBeenFocused || focusState.isFocused
-                            if (!focusState.isFocused && hasBeenFocused && editableListName.isNotEmpty()) {
-                                saveList(editableListName, uiState, editableListName, viewModel)
-                            }
-                        },
-                    leadingIcon = {
-                        Icon(
-                            Icons.AutoMirrored.Filled.List,
-                            contentDescription = null
-                        )
-                    },
-                    value = editableListName,
-                    onValueChange = { newName ->
-                        editableListName = newName
-                    },
-                    label = { Text("List name") },
+            ListNameBox(
+                editableListName = editableListName,
+                onListNameChange = { newName -> editableListName = newName },
+                onSaveList = { newName ->
+                    saveList(newName, uiState, editableListName, viewModel)
+                }
+            )
 
-                )
-            }
             Spacer(modifier = Modifier.height(16.dp))
             // Riga per aggiungere un nuovo elemento alla lista
             NewItemBox(
@@ -176,11 +164,11 @@ fun ShoppingListScreen(
                     ) {
                         // Elenco esistente di elementi
                         items(listItems.reversed()) { item ->
-                          ItemBox(
-                              item = item,
-                              onUpdateItem = viewModel::updateItem,
-                              onDelete = viewModel::deleteItem
-                          )
+                            ItemBox(
+                                item = item,
+                                onUpdateItem = viewModel::updateItem,
+                                onDelete = viewModel::deleteItem
+                            )
                         }
                     }
                 }

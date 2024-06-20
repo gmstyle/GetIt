@@ -12,6 +12,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.res.stringResource
+import it.gmstyle.getit.R
 import it.gmstyle.getit.compose.composables.commons.CommonTextField
 
 @Composable
@@ -20,7 +22,6 @@ fun ListNameBox(
     onListNameChange: (String) -> Unit,
     onSaveList: (String) -> Unit,
 ) {
-    var _editableListName by remember { mutableStateOf(editableListName) }
     var hasBeenFocused by remember { mutableStateOf(false) }
     Row {
         CommonTextField(
@@ -28,8 +29,8 @@ fun ListNameBox(
                 .weight(1f)
                 .onFocusChanged { focusState ->
                     hasBeenFocused = hasBeenFocused || focusState.isFocused
-                    if (!focusState.isFocused && hasBeenFocused && _editableListName.isNotEmpty()) {
-                        onSaveList(_editableListName)
+                    if (!focusState.isFocused && hasBeenFocused && editableListName.isNotEmpty()) {
+                        onSaveList(editableListName)
                     }
                 },
             leadingIcon = {
@@ -38,12 +39,11 @@ fun ListNameBox(
                     contentDescription = null
                 )
             },
-            value = _editableListName,
+            value = editableListName,
             onValueChange = { newName ->
-                _editableListName = newName
-                onListNameChange(_editableListName)
+                onListNameChange(newName)
             },
-            label = { Text("List name") },
+            placeholder = { Text(stringResource(id = R.string.placeholder_list_name)) }
         )
     }
 }
