@@ -12,7 +12,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Checkbox
@@ -46,7 +45,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import it.gmstyle.getit.R
-import it.gmstyle.getit.compose.composables.CommonLoader
+import it.gmstyle.getit.compose.composables.commons.CommonLoader
 import it.gmstyle.getit.data.entities.ListItem
 import it.gmstyle.getit.data.entities.ShoppingList
 import it.gmstyle.getit.viewmodels.shoppinglist.ShoppingListUiState

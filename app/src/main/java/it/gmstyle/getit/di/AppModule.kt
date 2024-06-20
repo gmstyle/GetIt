@@ -37,7 +37,7 @@ val appModule = module {
     ///ViewModels
     viewModel<ShoppingListsViewModel> { ShoppingListsViewModel(get<ShoppingListRepository>()) }
     viewModel<ShoppingListViewModel> { ShoppingListViewModel(get<ShoppingListRepository>()) }
-    viewModel<ChatViewModel> { ChatViewModel(get<ChatRepository>()) }
+    viewModel<ChatViewModel> { ChatViewModel(get<ChatRepository>(), get<ShoppingListRepository>()) }
 
 
 }

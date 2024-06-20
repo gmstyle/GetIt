@@ -1,4 +1,4 @@
-package it.gmstyle.getit.compose.composables
+package it.gmstyle.getit.compose.composables.commons
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize

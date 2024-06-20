@@ -32,6 +32,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import it.gmstyle.getit.compose.screens.chatscreen.composables.InputBox
+import it.gmstyle.getit.compose.screens.chatscreen.composables.MessageBubble
 import it.gmstyle.getit.data.models.ChatMessage
 import it.gmstyle.getit.viewmodels.chat.ChatViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -43,7 +45,6 @@ fun ChatScreen(
     viewModel: ChatViewModel = koinViewModel<ChatViewModel>()
 ) {
     val chatHistory by viewModel.chatHistory.collectAsState()
-    var prompt by rememberSaveable { mutableStateOf("") }
 
     Scaffold(
         topBar = {
@@ -77,31 +78,9 @@ fun ChatScreen(
                     MessageBubble(chatMessage)
                 }
             }
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface)
-                    .padding(8.dp)
-            ) {
-                TextField(
-                    value = prompt,
-                    onValueChange = { prompt = it },
-                    modifier = Modifier.weight(1f),
-                    placeholder = { Text("Type a message") }
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                // send button
-                IconButton(
-                    onClick = {
-                        viewModel.sendMessage(ChatMessage(prompt, true))
-                        prompt = ""
-                    })
-                {
-                    Icon(imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = "" )
-                }
-
+            // User input box
+            InputBox { chatMessage ->
+                viewModel.sendMessage(chatMessage)
             }
         }
     }

@@ -24,7 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import it.gmstyle.getit.compose.composables.ShoppingListSticker
+import it.gmstyle.getit.compose.screens.listsscreen.composables.ShoppingListSticker
 import it.gmstyle.getit.viewmodels.shoppinglists.ShoppingListsViewModel
 import org.koin.androidx.compose.koinViewModel
 

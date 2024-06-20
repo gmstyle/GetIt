@@ -1,4 +1,4 @@
-package it.gmstyle.getit.compose.screens.chatscreen
+package it.gmstyle.getit.compose.screens.chatscreen.composables
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -9,14 +9,21 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.ZeroCornerSize
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import it.gmstyle.getit.R
 import it.gmstyle.getit.data.models.ChatMessage
 
 @Composable
@@ -44,12 +51,19 @@ fun MessageBubble(
     val bubbleShape = if (isUserMessage) {
         // user message
         MaterialTheme.shapes.small.copy(
-            bottomEnd = ZeroCornerSize
+            bottomEnd = ZeroCornerSize,
+            bottomStart = CornerSize(16.dp),
+            topEnd = CornerSize(16.dp),
+            topStart = CornerSize(16.dp)
+
         )
     } else {
         // assistant message
         MaterialTheme.shapes.small.copy(
-            bottomStart = ZeroCornerSize
+            bottomStart = ZeroCornerSize,
+            bottomEnd = CornerSize(16.dp),
+            topStart = CornerSize(16.dp),
+            topEnd = CornerSize(16.dp)
         )
     }
 
@@ -57,7 +71,7 @@ fun MessageBubble(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
+            .padding(4.dp)
     ) {
         Column(
             modifier = Modifier
@@ -67,13 +81,21 @@ fun MessageBubble(
         ) {
            Text(text = message.message)
             Spacer(modifier = Modifier.padding(4.dp))
-            Row(
-               // modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-                Text(
-                    text = if (isUserMessage) "You" else "Assistant",
-                    style = MaterialTheme.typography.labelSmall
+            if (isUserMessage) {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = "",
+                    modifier = Modifier
+                        .size(18.dp)
+                        .align(Alignment.End)
+                )
+            } else {
+                Icon(
+                    painter = painterResource(id = R.drawable.baseline_assistant_24),
+                    contentDescription = "",
+                    modifier = Modifier
+                        .size(18.dp)
+                        .align(Alignment.Start)
                 )
             }
         }
