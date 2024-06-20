@@ -54,6 +54,7 @@ fun ShoppingListSticker(
                     text = shoppingList.list.name,
                     style = MaterialTheme.typography.headlineSmall
                 )
+                Spacer(modifier = Modifier.height(16.dp))
                 // prendi tutti gli items non completati
                 val items = shoppingList.items.filter { !it.completed }
                 BuildFirstTenItemsWithEllipsis(items)
