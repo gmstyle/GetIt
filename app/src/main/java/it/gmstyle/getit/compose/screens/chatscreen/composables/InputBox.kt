@@ -7,12 +7,15 @@ import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Add
@@ -31,6 +34,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -44,7 +49,7 @@ fun InputBox(
     onSend: (ChatMessage) -> Unit
 ) {
     var prompt by remember { mutableStateOf("") }
-    val images = remember { mutableStateListOf<Bitmap>() }
+    val selectedImages = remember { mutableStateListOf<Bitmap>() }
     // a chat input box
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -58,11 +63,24 @@ fun InputBox(
             onValueChange = { prompt = it },
             modifier = Modifier.weight(1f),
             placeholder = { Text("Type a message") },
-            trailingIcon = {
+            leadingIcon = {
                 // icon button for attachments
                 ImagePickerMenu {
-                   images.clear()
-                    images.addAll(it)
+                   selectedImages.clear()
+                    selectedImages.addAll(it)
+                }
+            },
+            trailingIcon = {
+                // images preview
+                selectedImages.forEach {
+                     Image(
+                        bitmap = it.asImageBitmap(),
+                        contentDescription = "",
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                    )
+                    Spacer(modifier = Modifier.width(2.dp))
                 }
             }
         )
@@ -73,8 +91,8 @@ fun InputBox(
             onClick = {
                 onSend(
                     ChatMessage(
-                        message = prompt,
-                        images = images,
+                        text = prompt,
+                        images = selectedImages,
                         isUser = true
                     )
                 )

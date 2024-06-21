@@ -26,13 +26,13 @@ class ChatViewModel(
 
             try {
                 val inputContent = content {
-                    text(chatPrompt.message)
+                    text(chatPrompt.text)
                     chatPrompt.images?.forEach { image(it) }
                 }
                 val generativeResponse = chatRepository.sendContent(inputContent)
                 generativeResponse.text?.let { outputContent ->
                     val chatResponse = ChatMessage(
-                        message = outputContent,
+                        text = outputContent,
                         isUser = false
                     )
                     _chatHistory.emit(_chatHistory.value - loadingMessage)
