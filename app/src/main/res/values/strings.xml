@@ -4,6 +4,8 @@
     <string name="placeholder_list_name">Your list name</string>
     <string name="placeholder_ai_assistant">Ai Assistant</string>">
     <string name="placeholder_user">You</string>">
+    <string name="placeholder_image_picker_take_photo">Take a photo</string>">
+    <string name="placeholder_image_picker_choose_from_gallery">Choose from gallery</string>">
 <!--    Button labels-->
     <string name="button_label_create_list">New list</string>
     <string name="button_label_ai_assistant">Ai Assistant</string>">

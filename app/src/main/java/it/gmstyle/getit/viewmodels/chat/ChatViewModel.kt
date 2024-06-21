@@ -16,7 +16,7 @@ class ChatViewModel(
 
     private var _chatHistory =MutableStateFlow<List<ChatMessage>>(emptyList())
     val chatHistory: StateFlow<List<ChatMessage>> = _chatHistory
-     private val loadingMessage = ChatMessage("...", false)
+     private val loadingMessage = ChatMessage("...", isUser = false)
 
     fun sendMessage(chatPrompt: ChatMessage) {
         viewModelScope.launch {
@@ -24,7 +24,7 @@ class ChatViewModel(
            _chatHistory.emit(_chatHistory.value + loadingMessage)
 
             try {
-                /*val generativeResponse = chatRepository.sendMessage(chatPrompt.message)
+                val generativeResponse = chatRepository.sendMessage(chatPrompt.message)
                 generativeResponse.text?.let { outputContent ->
                     val chatResponse = ChatMessage(
                         message = outputContent,
@@ -35,21 +35,21 @@ class ChatViewModel(
 
                 } ?: run {
                     _chatHistory.emit(_chatHistory.value - loadingMessage)
-                    _chatHistory.emit(_chatHistory.value + ChatMessage("No text generated", false))
+                    _chatHistory.emit(_chatHistory.value + ChatMessage("No text generated", isUser =  false))
 
-                }*/
+                }
 
-                val chatResponse = ChatMessage(
+                /*val chatResponse = ChatMessage(
                     message = "Mocked response from the model",
                     isUser = false
                 )
                 _chatHistory.emit(_chatHistory.value - loadingMessage)
-                _chatHistory.emit(_chatHistory.value + chatResponse)
+                _chatHistory.emit(_chatHistory.value + chatResponse)*/
 
             } catch (e: Exception) {
                val errorMessage = e.message ?: "An unexpected error occurred"
                 _chatHistory.emit(_chatHistory.value - loadingMessage)
-                _chatHistory.emit(_chatHistory.value + ChatMessage(errorMessage, false))
+                _chatHistory.emit(_chatHistory.value + ChatMessage(errorMessage, isUser = false))
 
             }
         }
