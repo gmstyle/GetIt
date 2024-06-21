@@ -8,7 +8,7 @@ import it.gmstyle.getit.data.repositories.ShoppingListRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
-class ShoppingListsViewModel(private val repository: ShoppingListRepository) : ViewModel() {
+class HomeViewModel(private val repository: ShoppingListRepository) : ViewModel() {
 
     val shoppingLists: Flow<List<ShoppingListWithItems>> = repository.lists
 

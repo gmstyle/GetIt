@@ -1,6 +1,7 @@
 package it.gmstyle.getit.data.repositories
 
 import com.google.ai.client.generativeai.GenerativeModel
+import com.google.ai.client.generativeai.type.Content
 import com.google.ai.client.generativeai.type.GenerateContentResponse
 import com.google.ai.client.generativeai.type.content
 import com.google.ai.client.generativeai.type.generationConfig
@@ -53,5 +54,9 @@ class ChatRepository {
     }*/
     suspend fun sendMessage(message: String): GenerateContentResponse {
         return chat.sendMessage(message)
+    }
+
+    suspend fun sendContent(content: Content): GenerateContentResponse {
+        return generativeModel.generateContent(content)
     }
 }

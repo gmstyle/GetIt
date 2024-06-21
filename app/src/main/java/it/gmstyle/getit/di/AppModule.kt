@@ -8,7 +8,7 @@ import it.gmstyle.getit.data.repositories.ChatRepository
 import it.gmstyle.getit.data.repositories.ShoppingListRepository
 import it.gmstyle.getit.viewmodels.chat.ChatViewModel
 import it.gmstyle.getit.viewmodels.shoppinglist.ShoppingListViewModel
-import it.gmstyle.getit.viewmodels.shoppinglists.ShoppingListsViewModel
+import it.gmstyle.getit.viewmodels.shoppinglists.HomeViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
@@ -35,7 +35,7 @@ val appModule = module {
     single<ChatRepository> { ChatRepository() }
 
     ///ViewModels
-    viewModel<ShoppingListsViewModel> { ShoppingListsViewModel(get<ShoppingListRepository>()) }
+    viewModel<HomeViewModel> { HomeViewModel(get<ShoppingListRepository>()) }
     viewModel<ShoppingListViewModel> { ShoppingListViewModel(get<ShoppingListRepository>()) }
     viewModel<ChatViewModel> { ChatViewModel(get<ChatRepository>(), get<ShoppingListRepository>()) }
 

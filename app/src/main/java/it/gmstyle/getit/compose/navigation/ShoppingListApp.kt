@@ -6,7 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import it.gmstyle.getit.compose.screens.chatscreen.ChatScreen
 import it.gmstyle.getit.compose.screens.listscreen.ShoppingListScreen
-import it.gmstyle.getit.compose.screens.listsscreen.ShoppingListsScreen
+import it.gmstyle.getit.compose.screens.homescreen.HomeScreen
 import org.koin.compose.KoinContext
 
 @Composable
@@ -14,9 +14,9 @@ fun ShoppingListApp() {
     val navController = rememberNavController()
 
     KoinContext {
-        NavHost(navController = navController, startDestination = "shoppingLists") {
+        NavHost(navController = navController, startDestination = "home") {
             // Add destinations here
-            composable("shoppingLists") { ShoppingListsScreen(navController = navController) }
+            composable("home") { HomeScreen(navController = navController) }
             composable("list/{id}") { navBackStackEntry ->
                 val listId = navBackStackEntry.arguments?.getString("id")?.toIntOrNull()
                 ShoppingListScreen(

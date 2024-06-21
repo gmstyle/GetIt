@@ -1,23 +1,17 @@
-package it.gmstyle.getit.compose.screens.listsscreen.composables
+package it.gmstyle.getit.compose.screens.homescreen.composables
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,7 +26,7 @@ import it.gmstyle.getit.data.entities.ListItem
 import it.gmstyle.getit.data.entities.ShoppingListWithItems
 
 @Composable
-fun ShoppingListSticker(
+fun ListSticker(
     shoppingList: ShoppingListWithItems,
     onViewList: () -> Unit,
     onDeleteList: () -> Unit

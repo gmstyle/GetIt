@@ -1,7 +1,6 @@
-package it.gmstyle.getit.compose.screens.listsscreen
+package it.gmstyle.getit.compose.screens.homescreen
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.ime
@@ -13,7 +12,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -23,21 +21,19 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import it.gmstyle.getit.R
-import it.gmstyle.getit.compose.screens.listsscreen.composables.ShoppingListSticker
-import it.gmstyle.getit.viewmodels.shoppinglists.ShoppingListsViewModel
+import it.gmstyle.getit.compose.screens.homescreen.composables.ListSticker
+import it.gmstyle.getit.viewmodels.shoppinglists.HomeViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ShoppingListsScreen(
+fun HomeScreen(
     navController: NavController,
-    viewModel: ShoppingListsViewModel = koinViewModel<ShoppingListsViewModel>()
+    viewModel: HomeViewModel = koinViewModel<HomeViewModel>()
 ) {
 
     val lists by viewModel.shoppingLists.collectAsState(initial = emptyList())
@@ -77,7 +73,7 @@ fun ShoppingListsScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(lists) { list ->
-                    ShoppingListSticker(
+                    ListSticker(
                         shoppingList = list,
                         onViewList = {
                             navController.navigate("list/${list.list.id}")
