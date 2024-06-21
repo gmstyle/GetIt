@@ -2,6 +2,7 @@ package it.gmstyle.getit.viewmodels.chat
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.ai.client.generativeai.type.content
 import it.gmstyle.getit.data.models.ChatMessage
 import it.gmstyle.getit.data.repositories.ChatRepository
 import it.gmstyle.getit.data.repositories.ShoppingListRepository
@@ -24,7 +25,11 @@ class ChatViewModel(
            _chatHistory.emit(_chatHistory.value + loadingMessage)
 
             try {
-                val generativeResponse = chatRepository.sendMessage(chatPrompt.message)
+                val inputContent = content {
+                    text(chatPrompt.message)
+                    chatPrompt.images?.forEach { image(it) }
+                }
+                val generativeResponse = chatRepository.sendContent(inputContent)
                 generativeResponse.text?.let { outputContent ->
                     val chatResponse = ChatMessage(
                         message = outputContent,
