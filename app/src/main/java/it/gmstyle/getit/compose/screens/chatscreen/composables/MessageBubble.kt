@@ -125,7 +125,7 @@ fun ChatItemPreview() {
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(8.dp)
+            .padding(top = 8.dp, bottom = 8.dp)
     ) {
         MessageBubble(
             message = ChatMessage(

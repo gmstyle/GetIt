@@ -1,6 +1,8 @@
 package it.gmstyle.getit.compose.screens.chatscreen
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.ime
@@ -66,7 +68,8 @@ fun ChatScreen(
             // Chat history
             LazyColumn(
                 modifier = Modifier.weight(1f),
-                reverseLayout =  true
+                reverseLayout =  true,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 val chatHistoryReversed = chatHistory.reversed()
                 items(chatHistoryReversed) { chatMessage ->
