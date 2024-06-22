@@ -92,7 +92,7 @@ fun InputBox(
                 onSend(
                     ChatMessage(
                         text = prompt,
-                        images = selectedImages,
+                        images = selectedImages.toList(),
                         isUser = true
                     )
                 )
