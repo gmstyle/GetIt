@@ -97,6 +97,7 @@ fun InputBox(
                     )
                 )
                 prompt = ""
+                selectedImages.clear()
             })
         {
             Icon(imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = "")
