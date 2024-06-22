@@ -7,15 +7,14 @@ import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Add
@@ -34,8 +33,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -51,89 +48,100 @@ fun InputBox(
     var prompt by remember { mutableStateOf("") }
     val selectedImages = remember { mutableStateListOf<Bitmap>() }
     // a chat input box
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(8.dp)
-    ) {
-        CommonTextField(
-            value = prompt,
-            onValueChange = { prompt = it },
-            modifier = Modifier.weight(1f),
-            placeholder = { Text("Type a message") },
-            leadingIcon = {
-                // icon button for attachments
-                ImagePickerMenu {
-                   selectedImages.clear()
-                    selectedImages.addAll(it)
-                }
-            },
-            trailingIcon = {
-                // images preview
-                selectedImages.forEach {
-                     Image(
-                        bitmap = it.asImageBitmap(),
-                        contentDescription = "",
-                        modifier = Modifier
-                            .size(32.dp)
-                            .clip(CircleShape)
-                    )
-                    Spacer(modifier = Modifier.width(2.dp))
-                }
+    Column {
+        //attached images preview
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            selectedImages.forEach {
+                SelectedImagePreview(
+                    image = it,
+                    onRemove = {
+                        selectedImages.remove(it)
+                    })
             }
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        // send button
-        FilledIconButton(
-            enabled = prompt.isNotBlank(),
-            onClick = {
-                onSend(
-                    ChatMessage(
-                        text = prompt,
-                        images = selectedImages.toList(),
-                        isUser = true
-                    )
-                )
-                prompt = ""
-                selectedImages.clear()
-            })
-        {
-            Icon(imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = "")
         }
 
+        // input box
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(8.dp)
+        ) {
+            CommonTextField(
+                value = prompt,
+                onValueChange = { prompt = it },
+                modifier = Modifier.weight(1f),
+                placeholder = { Text("Type a message") },
+                leadingIcon = {
+                    // icon button for attachments
+                    ImagePickerMenu(
+                        selectedImages = selectedImages,
+                        maxImages = 3,
+                        enabled = selectedImages.size < 3,
+                        onImagesSelected = {
+                            selectedImages.clear()
+                            selectedImages.addAll(it)
+                        }
+                    )
+                }
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            // send button
+            FilledIconButton(
+                enabled = prompt.isNotBlank(),
+                onClick = {
+                    onSend(
+                        ChatMessage(
+                            text = prompt,
+                            images = selectedImages.toList(),
+                            isUser = true
+                        )
+                    )
+                    prompt = ""
+                    selectedImages.clear()
+                })
+            {
+                Icon(imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = "")
+            }
+
+        }
     }
 }
 
 //  Selettore di immagini o fotocamera per invio di immagini nella chat
 @Composable
 fun ImagePickerMenu(
-    onImagesSelected: (List<Bitmap>) -> Unit
+    selectedImages: MutableList<Bitmap>,
+    onImagesSelected: (List<Bitmap>) -> Unit,
+    maxImages: Int = 3,
+    enabled: Boolean = true
 ) {
     var showMenu by remember { mutableStateOf(false) }
-    val images = remember { mutableStateListOf<Bitmap>() }
+    val _selectedImages = selectedImages
     val context = LocalContext.current
 
     val imagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickMultipleVisualMedia()
     ) { uris ->
-        uris.forEach { uri ->
-            val bitmap = try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                ImageDecoder.createSource(context.contentResolver, uri).let { source ->
-                    ImageDecoder.decodeBitmap(source)
-                }
-            } else {
-                MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
+        val newImages = uris.mapNotNull { uri ->
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    ImageDecoder.createSource(context.contentResolver, uri).let { source ->
+                        ImageDecoder.decodeBitmap(source)
+                    }
+                } else {
+                    MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
+                }} catch (e: Exception) {
+                null
             }
-        } catch (e: Exception) {
-            null
         }
-        bitmap?.let {
-            images.add(it)
-            onImagesSelected(images)
-        }
+        // Aggiungi le nuove immagini solo se non superano il limite
+        if (_selectedImages.size + newImages.size <= maxImages) {
+            _selectedImages.addAll(newImages)
+            onImagesSelected(_selectedImages)
         }
     }
 
@@ -141,12 +149,15 @@ fun ImagePickerMenu(
         contract = ActivityResultContracts.TakePicturePreview()
     ) { bitmap ->
         bitmap?.let {
-            images.add(it)
-            onImagesSelected(images)
+            _selectedImages.add(it)
+            onImagesSelected(_selectedImages)
         }
     }
 
-    IconButton(onClick = { showMenu = true }) {
+    IconButton(
+        enabled = enabled,
+        onClick = { showMenu = true }
+    ) {
         Icon(Icons.Filled.Add, contentDescription = "")
     }
 
