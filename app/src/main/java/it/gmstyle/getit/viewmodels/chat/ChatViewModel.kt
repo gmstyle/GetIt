@@ -16,48 +16,48 @@ class ChatViewModel(
     private val shoppingListRepository: ShoppingListRepository
 ) : ViewModel() {
 
-    private var _chatHistory =MutableStateFlow<List<ChatMessage>>(emptyList())
+    private var _chatHistory = MutableStateFlow<List<ChatMessage>>(emptyList())
     val chatHistory: StateFlow<List<ChatMessage>> = _chatHistory
-     private val loadingMessage = ChatMessage("...", isUser = false)
+    private val loadingMessage = ChatMessage("...", isUser = false)
 
     fun sendMessage(chatPrompt: ChatMessage) {
-    viewModelScope.launch {
-        _chatHistory.emit(_chatHistory.value + chatPrompt)
-        _chatHistory.emit(_chatHistory.value + loadingMessage)
+        viewModelScope.launch {
+            _chatHistory.emit(_chatHistory.value + chatPrompt)
+            _chatHistory.emit(_chatHistory.value + loadingMessage)
 
-        try {
-            val generativeResponse: GenerateContentResponse?
-            if (chatPrompt.images.isNullOrEmpty()) {
-                generativeResponse = chatRepository.sendMessage(chatPrompt.text)
+            try {
+                val generativeResponse: GenerateContentResponse?
+                if (chatPrompt.images.isNullOrEmpty()) {
+                    generativeResponse = chatRepository.sendMessage(chatPrompt.text)
 
-            } else {
-                val inputContent = content {
-                    text(chatPrompt.text)
-                    chatPrompt.images.forEach { image(it) }
+                } else {
+                    val inputContent = content {
+                        text(chatPrompt.text)
+                        chatPrompt.images.forEach { image(it) }
+                    }
+                    generativeResponse = chatRepository.sendContent(inputContent)
                 }
-                generativeResponse = chatRepository.sendContent(inputContent)
+                handleResponse(generativeResponse)
+            } catch (e: Exception) {
+                val errorMessage = e.message ?: "An unexpected error occurred"
+                _chatHistory.emit(_chatHistory.value - loadingMessage)
+                _chatHistory.emit(_chatHistory.value + ChatMessage(errorMessage, isUser = false))
             }
-            handleResponse(generativeResponse)
-        } catch (e: Exception) {
-            val errorMessage = e.message ?: "An unexpected error occurred"
-            _chatHistory.emit(_chatHistory.value - loadingMessage)
-            _chatHistory.emit(_chatHistory.value + ChatMessage(errorMessage, isUser = false))
         }
     }
-}
 
-private suspend fun handleResponse(generativeResponse: GenerateContentResponse) {
-    generativeResponse.text?.let { outputContent ->
-        val chatResponse = ChatMessage(
-            text = outputContent,
-            isUser = false
-        )
-        _chatHistory.emit(_chatHistory.value - loadingMessage)
-        _chatHistory.emit(_chatHistory.value + chatResponse)
-    } ?: run {
-        _chatHistory.emit(_chatHistory.value - loadingMessage)
-        _chatHistory.emit(_chatHistory.value + ChatMessage("No text generated", isUser = false))
+    private suspend fun handleResponse(generativeResponse: GenerateContentResponse) {
+        generativeResponse.text?.let { outputContent ->
+            val chatResponse = ChatMessage(
+                text = outputContent,
+                isUser = false
+            )
+            _chatHistory.emit(_chatHistory.value - loadingMessage)
+            _chatHistory.emit(_chatHistory.value + chatResponse)
+        } ?: run {
+            _chatHistory.emit(_chatHistory.value - loadingMessage)
+            _chatHistory.emit(_chatHistory.value + ChatMessage("No text generated", isUser = false))
+        }
     }
-}
 
 }
