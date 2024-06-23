@@ -22,7 +22,7 @@ class ChatService(
     private suspend fun createList(listName: String): JSONObject {
         val listToCreate = ShoppingList(name = listName)
         val listId = shoppingListRepository.insertList(listToCreate)
-        return JSONObject().put("listId", listId)
+        return JSONObject().put("listId", listId.toString())
     }
     // Definizione della funzione "createList" per il modello generativo
     private val createListTool = defineFunction(
@@ -33,21 +33,20 @@ class ChatService(
         createList(listName)
     }
 
-    private suspend fun addItemsToList(listId: Int, names: String): JSONObject {
-        val items = names.split(",").map { ListItem(listId = listId, name = it) }
-        items.forEach { shoppingListRepository.insertItem(it) }
-        return JSONObject().put("items", items.map { it.name })
+    private suspend fun addItemToList(listId: String, name: String): JSONObject {
+        val item = ListItem(listId = listId.toInt(), name = name)
+        val itemId = shoppingListRepository.insertItem(item)
+        return JSONObject().put("itemId", itemId)
     }
 
-    private val addItemsToListTool = defineFunction(
-        name = "addItemsToList",
-        description = "Aggiunge una lista di elementi a una lista della spesa esistente",
-        Schema.int("listId", "L'ID della lista della spesa"),
-        Schema.str("names", "I nomi degli elementi da aggiungere, separati da virgola"),
-    ){ listId, names ->
-        addItemsToList(listId.toInt(), names)
+    private val addItemToListTool = defineFunction(
+        name = "addItemToList",
+        description = "Aggiunge un elemento a una lista della spesa esistente. L'ID della lista della spesa è ottenuto dalla funzione 'createList' ed è contenuto nel campo 'listId' del JSON restituito.",
+        Schema.str("listId", "L'ID della lista della spesa, ottenuto dal campo 'listId' del JSON restituito dalla funzione 'createList'"),
+        Schema.str("name", "Il nome dell'elemento da aggiungere alla lista della spesa"),
+    ){ listId, name ->
+        addItemToList(listId, name)
     }
-
 
     private val _generativeModel = GenerativeModel(
         modelName = "gemini-1.5-flash",
@@ -61,9 +60,9 @@ class ChatService(
         },
         tools = listOf(
             Tool(listOf(
-                createListTool
+                createListTool,
+                addItemToListTool
             )),
-                Tool(listOf( addItemsToListTool))
 
         ),
         systemInstruction = content {

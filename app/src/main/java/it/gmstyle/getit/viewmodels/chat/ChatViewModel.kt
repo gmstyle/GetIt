@@ -32,18 +32,21 @@ class ChatViewModel(
                 val intputContent = content {
                     text(chatPrompt.text)
                     chatPrompt.images?.forEach { image(it) }
-
                 }
                 var generativeResponse = chatService.sendMessage(intputContent)
+                val functionDeclarations =
+                    chatService.generativeModel.tools?.flatMap { it.functionDeclarations }
                 // Verifica se la risposta contiene chiamate a funzioni
                 generativeResponse.functionCalls.let { functionCalls ->
                     functionCalls.forEach { functionCall ->
-                        val matchedFunction = chatService.generativeModel.tools?.flatMap { it.functionDeclarations }
+
+                        val matchedFunction = functionDeclarations
                             ?.first { it.name == functionCall.name }
                             ?: throw InvalidStateException("Function not found: ${functionCall.name}")
 
-                        // Esegue la funzione
+                        // Esegue la funzione corrispondente
                         val functionResponse: JSONObject = matchedFunction.execute(functionCall)
+                        // Aggiunge la risposta della funzione alla risposta generativa
                         generativeResponse = chatService.sendMessage(
                             content(role = "function") {
                                 part(FunctionResponsePart(functionCall.name, functionResponse))
@@ -54,6 +57,7 @@ class ChatViewModel(
                 handleResponse(generativeResponse)
 
             } catch (e: Exception) {
+                print(e.stackTrace)
                 val errorMessage = e.message ?: "An unexpected error occurred"
                 _chatHistory.emit(_chatHistory.value - loadingMessage)
                 _chatHistory.emit(_chatHistory.value + ChatMessage(errorMessage, isUser = false))
