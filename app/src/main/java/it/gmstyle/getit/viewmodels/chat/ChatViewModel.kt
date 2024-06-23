@@ -7,7 +7,7 @@ import com.google.ai.client.generativeai.type.GenerateContentResponse
 import com.google.ai.client.generativeai.type.InvalidStateException
 import com.google.ai.client.generativeai.type.content
 import it.gmstyle.getit.data.models.ChatMessage
-import it.gmstyle.getit.data.services.ChatService
+import it.gmstyle.getit.services.ChatService
 import it.gmstyle.getit.data.repositories.ShoppingListRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -44,7 +44,6 @@ class ChatViewModel(
 
                         // Esegue la funzione
                         val functionResponse: JSONObject = matchedFunction.execute(functionCall)
-
                         generativeResponse = chatService.sendMessage(
                             content(role = "function") {
                                 part(FunctionResponsePart(functionCall.name, functionResponse))

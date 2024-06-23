@@ -113,19 +113,6 @@ fun ShoppingListScreen(
                 }, scrollBehavior = scrollBehavior
 
             )
-        },
-        floatingActionButton = {
-            // val alla schermata chat
-            ExtendedFloatingActionButton(
-                text = { Text(stringResource(id = R.string.button_label_ai_assistant)) },
-                icon = {
-                    Icon(
-                        painterResource(id = R.drawable.baseline_assistant_24),
-                        contentDescription = "Chat"
-                    )
-                },
-                onClick = { navController.navigate("chat") }
-            )
         }
     ) { innerPadding ->
         Column(

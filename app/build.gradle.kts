@@ -71,6 +71,7 @@ dependencies {
     implementation(libs.room.ktx)
     implementation(libs.generativeai)
     implementation(libs.secrets.gradle.plugin)
+    implementation(libs.engage.core)
     ksp(libs.room.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

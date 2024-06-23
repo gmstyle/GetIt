@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -22,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import it.gmstyle.getit.R
@@ -46,19 +48,31 @@ fun HomeScreen(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
-                title = { Text(text = "GetIt!") }
+                title = { Text(text = stringResource(id = R.string.app_name)) },
+                actions = {
+                    // Aggiungi il pulsante per creare una nuova lista
+                    IconButton(onClick = {
+                        // navigo verso la schermata ListScreen per creare una nuova lista
+                        val listId: Int? = null
+                        navController.navigate("list/$listId")
+                    }) {
+                        Icon(imageVector = Icons.Filled.Add, contentDescription = "")
+                    }
+                }
             )
         },
         floatingActionButton = {
+            // val alla schermata chat
             ExtendedFloatingActionButton(
-                text = { Text(stringResource(id = R.string.button_label_create_list)) },
-                icon = { Icon(imageVector = Icons.Filled.Add, contentDescription = "") },
-                onClick = {
-                    // navigo verso la schermata ListScreen per creare una nuova lista
-                    val listId: Int? = null
-                    navController.navigate("list/$listId")
-
-                })
+                text = { Text(stringResource(id = R.string.button_label_ai_assistant)) },
+                icon = {
+                    Icon(
+                        painterResource(id = R.drawable.baseline_assistant_24),
+                        contentDescription = "Chat"
+                    )
+                },
+                onClick = { navController.navigate("chat") }
+            )
         }
     ) { padding ->
 

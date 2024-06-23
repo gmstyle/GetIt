@@ -4,7 +4,7 @@ import androidx.room.Room
 import it.gmstyle.getit.data.ShoppingListDatabase
 import it.gmstyle.getit.data.dao.ListItemDao
 import it.gmstyle.getit.data.dao.ShoppingListDao
-import it.gmstyle.getit.data.services.ChatService
+import it.gmstyle.getit.services.ChatService
 import it.gmstyle.getit.data.repositories.ShoppingListRepository
 import it.gmstyle.getit.viewmodels.chat.ChatViewModel
 import it.gmstyle.getit.viewmodels.shoppinglist.ShoppingListViewModel
