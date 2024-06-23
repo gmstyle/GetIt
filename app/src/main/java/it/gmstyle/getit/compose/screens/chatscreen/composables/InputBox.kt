@@ -120,7 +120,10 @@ fun ImagePickerMenu(
     enabled: Boolean = true
 ) {
     var showMenu by remember { mutableStateOf(false) }
-    val _selectedImages = selectedImages
+    val _selectedImages = remember { mutableStateListOf<Bitmap>() }.apply {
+        clear()
+        addAll(selectedImages)
+    }
     val context = LocalContext.current
 
     val imagePicker = rememberLauncherForActivityResult(
