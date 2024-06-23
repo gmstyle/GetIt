@@ -1,16 +1,35 @@
-package it.gmstyle.getit.data.repositories
+package it.gmstyle.getit.data.services
 
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.Content
 import com.google.ai.client.generativeai.type.GenerateContentResponse
+import com.google.ai.client.generativeai.type.Schema
+import com.google.ai.client.generativeai.type.Tool
 import com.google.ai.client.generativeai.type.content
+import com.google.ai.client.generativeai.type.defineFunction
 import com.google.ai.client.generativeai.type.generationConfig
 import it.gmstyle.getit.BuildConfig
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOn
+import it.gmstyle.getit.data.entities.ShoppingList
+import it.gmstyle.getit.data.repositories.ShoppingListRepository
+import org.json.JSONObject
 
-class ChatRepository {
+class ChatService(
+    private val shoppingListRepository: ShoppingListRepository
+) {
+
+    private suspend fun createList(listName: String): JSONObject {
+        val listToCreate = ShoppingList(name = listName)
+        val listId = shoppingListRepository.insertList(listToCreate)
+        return JSONObject().put("listId", listId)
+    }
+    private val createListTool = defineFunction(
+        name = "createList",
+        description = "Crea una lista della spesa su richiesta dell'utente",
+        Schema.str("listName", "Il nome della lista della spesa"),
+    ){ listName ->
+        createList(listName)
+    }
+
 
     private val generativeModel = GenerativeModel(
         modelName = "gemini-1.5-flash",
@@ -22,6 +41,9 @@ class ChatRepository {
             maxOutputTokens = 8192
             responseMimeType = "text/plain"
         },
+        tools = listOf(
+            Tool(listOf(createListTool))
+        ),
         systemInstruction = content {
             text("Sei un assistente per la gestione delle liste della spesa e sei parte integrante dell' applicazione mobile android che si chiama \"Get it!\". L'utente ha bisogno di creare una lista della spesa per cucinare un piatto specifico o un menu a base specifica di qualcosa, ad esempio di sole verdure piuttosto che di carne o di pesce, quindi tu sei in grado di aiutarlo a comporre la lista della spesa predisponendo gli ingredienti necessari da acquistare. L'utente, invece, potrebbe anche semplicemente voler usare le funzionalità dell'applicazione per creare e modificare la lista della spesa settimanale che ha bisogno di fare per la casa e la famiglia. Dovresti poter essere in grado di aiutarlo magari con dei reminder o delle notifiche locali. Non essere molto prolisso nelle risposte, cerca di essere conciso e comprendioso allo stesso tempo.")        }
     )
@@ -48,9 +70,6 @@ class ChatRepository {
 
     private val chat = generativeModel.startChat(chatHistory)
 
-    /*fun sendMessage(message: String): Flow<GenerateContentResponse> {
-        return chat.sendMessageStream(message).flowOn(Dispatchers.IO)
-    }*/
     suspend fun sendMessage(message: String): GenerateContentResponse {
         return chat.sendMessage(message)
     }

@@ -4,7 +4,7 @@ import androidx.room.Room
 import it.gmstyle.getit.data.ShoppingListDatabase
 import it.gmstyle.getit.data.dao.ListItemDao
 import it.gmstyle.getit.data.dao.ShoppingListDao
-import it.gmstyle.getit.data.repositories.ChatRepository
+import it.gmstyle.getit.data.services.ChatService
 import it.gmstyle.getit.data.repositories.ShoppingListRepository
 import it.gmstyle.getit.viewmodels.chat.ChatViewModel
 import it.gmstyle.getit.viewmodels.shoppinglist.ShoppingListViewModel
@@ -32,12 +32,14 @@ val appModule = module {
     }
     ///Repositories
     single<ShoppingListRepository> { ShoppingListRepository(get<ShoppingListDao>(), get<ListItemDao>()) }
-    single<ChatRepository> { ChatRepository() }
+
+    ///Services
+    single<ChatService> { ChatService(get<ShoppingListRepository>()) }
 
     ///ViewModels
     viewModel<HomeViewModel> { HomeViewModel(get<ShoppingListRepository>()) }
     viewModel<ShoppingListViewModel> { ShoppingListViewModel(get<ShoppingListRepository>()) }
-    viewModel<ChatViewModel> { ChatViewModel(get<ChatRepository>(), get<ShoppingListRepository>()) }
+    viewModel<ChatViewModel> { ChatViewModel(get<ChatService>(), get<ShoppingListRepository>()) }
 
 
 }

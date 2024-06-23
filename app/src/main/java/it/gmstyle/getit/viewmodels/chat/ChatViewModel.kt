@@ -5,14 +5,14 @@ import androidx.lifecycle.viewModelScope
 import com.google.ai.client.generativeai.type.GenerateContentResponse
 import com.google.ai.client.generativeai.type.content
 import it.gmstyle.getit.data.models.ChatMessage
-import it.gmstyle.getit.data.repositories.ChatRepository
+import it.gmstyle.getit.data.services.ChatService
 import it.gmstyle.getit.data.repositories.ShoppingListRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class ChatViewModel(
-    private val chatRepository: ChatRepository,
+    private val chatService: ChatService,
     private val shoppingListRepository: ShoppingListRepository
 ) : ViewModel() {
 
@@ -28,14 +28,14 @@ class ChatViewModel(
             try {
                 val generativeResponse: GenerateContentResponse?
                 if (chatPrompt.images.isNullOrEmpty()) {
-                    generativeResponse = chatRepository.sendMessage(chatPrompt.text)
+                    generativeResponse = chatService.sendMessage(chatPrompt.text)
 
                 } else {
                     val inputContent = content {
                         text(chatPrompt.text)
                         chatPrompt.images.forEach { image(it) }
                     }
-                    generativeResponse = chatRepository.sendContent(inputContent)
+                    generativeResponse = chatService.sendContent(inputContent)
                 }
                 handleResponse(generativeResponse)
             } catch (e: Exception) {
