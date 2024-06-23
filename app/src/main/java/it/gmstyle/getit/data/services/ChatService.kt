@@ -31,7 +31,7 @@ class ChatService(
     }
 
 
-    private val generativeModel = GenerativeModel(
+    private val _generativeModel = GenerativeModel(
         modelName = "gemini-1.5-flash",
         apiKey = BuildConfig.geminiApiKey,
         generationConfig = generationConfig {
@@ -68,13 +68,11 @@ class ChatService(
         },
     )
 
-    private val chat = generativeModel.startChat(chatHistory)
+    val generativeModel get() = _generativeModel
 
-    suspend fun sendMessage(message: String): GenerateContentResponse {
-        return chat.sendMessage(message)
-    }
+    private val chat = _generativeModel.startChat(chatHistory)
 
-    suspend fun sendContent(content: Content): GenerateContentResponse {
-        return generativeModel.generateContent(content)
+    suspend fun sendMessage(content: Content): GenerateContentResponse {
+        return chat.sendMessage(content)
     }
 }
