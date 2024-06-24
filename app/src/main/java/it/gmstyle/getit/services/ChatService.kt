@@ -33,12 +33,13 @@ class ChatService(
         createList(listName)
     }
 
+    // Aggiunge un elemento alla lista della spesa con l'ID specificato
     private suspend fun addItemToList(listId: String, name: String): JSONObject {
         val item = ListItem(listId = listId.toInt(), name = name)
         val itemId = shoppingListRepository.insertItem(item)
         return JSONObject().put("itemId", itemId)
     }
-
+    // Definizione della funzione "addItemToList" per il modello generativo
     private val addItemToListTool = defineFunction(
         name = "addItemToList",
         description = "Aggiunge un elemento a una lista della spesa esistente. L'ID della lista della spesa è ottenuto dalla funzione 'createList' ed è contenuto nel campo 'listId' del JSON restituito.",
@@ -56,7 +57,6 @@ class ChatService(
             topK = 64
             topP = 0.95f
             maxOutputTokens = 8192
-            responseMimeType = "text/plain"
         },
         tools = listOf(
             Tool(listOf(
