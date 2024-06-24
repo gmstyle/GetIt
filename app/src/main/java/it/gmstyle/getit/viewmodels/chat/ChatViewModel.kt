@@ -1,5 +1,6 @@
 package it.gmstyle.getit.viewmodels.chat
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.ai.client.generativeai.type.FunctionResponsePart
@@ -46,6 +47,7 @@ class ChatViewModel(
 
                         // Esegue la funzione corrispondente
                         val functionResponse: JSONObject = matchedFunction.execute(functionCall)
+                        Log.d("TAG", "Function response: $functionResponse")
                         // Aggiunge la risposta della funzione alla risposta generativa
                         generativeResponse = chatService.sendMessage(
                             content(role = "function") {
@@ -57,7 +59,7 @@ class ChatViewModel(
                 handleResponse(generativeResponse)
 
             } catch (e: Exception) {
-                print(e.stackTrace)
+                Log.e("TAG", "Error sending message: ${e}")
                 val errorMessage = e.message ?: "An unexpected error occurred"
                 _chatHistory.emit(_chatHistory.value - loadingMessage)
                 _chatHistory.emit(_chatHistory.value + ChatMessage(errorMessage, isUser = false))
