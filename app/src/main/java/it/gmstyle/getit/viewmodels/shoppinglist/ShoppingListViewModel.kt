@@ -18,7 +18,7 @@ class ShoppingListViewModel(private val repository: ShoppingListRepository) : Vi
 
     fun getShoppingListWithItems(listId: Int) {
         viewModelScope.launch {
-            repository.getListById(listId)
+            repository.getListByIdFlow(listId)
                 .onStart {
                     _uiState.value = ShoppingListUiState.Loading
                 }.catch {

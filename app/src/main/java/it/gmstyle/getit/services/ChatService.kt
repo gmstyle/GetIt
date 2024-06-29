@@ -12,52 +12,14 @@ import it.gmstyle.getit.BuildConfig
 import it.gmstyle.getit.data.entities.ListItem
 import it.gmstyle.getit.data.entities.ShoppingList
 import it.gmstyle.getit.data.repositories.ShoppingListRepository
+import it.gmstyle.getit.services.helpers.GeminiToolsHelper
 import org.json.JSONObject
 
 class ChatService(
     private val shoppingListRepository: ShoppingListRepository
 ) {
 
-    // Crea una lista della spesa con il nome specificato
-    private suspend fun createList(listName: String): JSONObject {
-        val listToCreate = ShoppingList(name = listName)
-        val listId = shoppingListRepository.insertList(listToCreate)
-        return JSONObject().put("listId", listId.toString())
-    }
-    // Definizione della funzione "createList" per il modello generativo
-    private val createListTool = defineFunction(
-        name = "createList",
-        description = "Crea una lista della spesa su richiesta dell'utente",
-        Schema.str("listName", "Il nome della lista della spesa"),
-    ){ listName ->
-        createList(listName)
-    }
-
-    // Aggiunge un elemento alla lista della spesa con l'ID specificato
-    private suspend fun addItemToList(listId: String, name: String): JSONObject {
-        val item = ListItem(listId = listId.toInt(), name = name)
-        val itemId = shoppingListRepository.insertItem(item)
-        return JSONObject().put("itemId", itemId)
-    }
-    // Definizione della funzione "addItemsToList" per il modello generativo
-    private suspend fun addItemsToList(listId: String, names: String): JSONObject {
-        val savedItemsIds = mutableListOf<Int>()
-        val list = names.split(",")
-      list.forEach { name ->
-          val json = addItemToList(listId, name)
-            savedItemsIds.add(json.getInt("itemId"))
-      }
-        return JSONObject().put("itemIds", savedItemsIds)
-    }
-
-    private val addItemsToListTool = defineFunction(
-        name = "addItemsToList",
-        description = "Aggiunge più elementi a una lista della spesa esistente. L'ID della lista della spesa è ottenuto dalla funzione 'createList' ed è contenuto nel campo 'listId' del JSON restituito.",
-        Schema.str("listId", "L'ID della lista della spesa, ottenuto dal campo 'listId' del JSON restituito dalla funzione 'createList'"),
-        Schema.str("names", "I nomi degli elementi da aggiungere alla lista della spesa separati da virgola"),
-    ){ listId, names ->
-        addItemsToList(listId, names)
-    }
+    private val geminiToolsHelper = GeminiToolsHelper(shoppingListRepository)
 
     private val _generativeModel = GenerativeModel(
         modelName = "gemini-1.5-flash",
@@ -68,13 +30,7 @@ class ChatService(
             topP = 0.95f
             maxOutputTokens = 8192
         },
-        tools = listOf(
-            Tool(listOf(
-                createListTool,
-                addItemsToListTool
-            )),
-
-        ),
+        tools = geminiToolsHelper.tools,
         systemInstruction = content {
             text("Sei un assistente per la gestione delle liste della spesa e sei parte integrante dell' applicazione mobile android che si chiama \"Get it!\". L'utente ha bisogno di creare una lista della spesa per cucinare un piatto specifico o un menu a base specifica di qualcosa, ad esempio di sole verdure piuttosto che di carne o di pesce, quindi tu sei in grado di aiutarlo a comporre la lista della spesa predisponendo gli ingredienti necessari da acquistare. L'utente, invece, potrebbe anche semplicemente voler usare le funzionalità dell'applicazione per creare e modificare la lista della spesa settimanale che ha bisogno di fare per la casa e la famiglia. Dovresti poter essere in grado di aiutarlo magari con dei reminder o delle notifiche locali. Non essere molto prolisso nelle risposte, cerca di essere conciso e comprendioso allo stesso tempo.")        }
     )

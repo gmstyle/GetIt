@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 
 class HomeViewModel(private val repository: ShoppingListRepository) : ViewModel() {
 
-    val shoppingLists: Flow<List<ShoppingListWithItems>> = repository.lists
+    val shoppingLists: Flow<List<ShoppingListWithItems>> = repository.listsFlow
 
     fun deleteListWithItems(list: ShoppingList) {
         viewModelScope.launch {

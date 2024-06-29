@@ -16,11 +16,19 @@ interface ShoppingListDao {
 
     @Transaction
     @Query("SELECT * FROM ShoppingList")
-    fun getAllWithItems(): Flow<List<ShoppingListWithItems>>
+    fun getAllWithItemsFlow(): Flow<List<ShoppingListWithItems>>
+
+    @Transaction
+    @Query("SELECT * FROM ShoppingList")
+    suspend fun getAllWithItems(): List<ShoppingListWithItems>
 
     @Transaction
     @Query("SELECT * FROM ShoppingList WHERE id = :id")
-    fun getWithItemsByListId(id: Int): Flow<ShoppingListWithItems>
+    fun getWithItemsByListIdFlow(id: Int): Flow<ShoppingListWithItems>
+
+    @Transaction
+    @Query("SELECT * FROM ShoppingList WHERE id = :id")
+    suspend fun getWithItemsByListId(id: Int): ShoppingListWithItems
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(shoppingList: ShoppingList): Long

@@ -5,15 +5,16 @@ import it.gmstyle.getit.data.dao.ShoppingListDao
 import it.gmstyle.getit.data.entities.ListItem
 import it.gmstyle.getit.data.entities.ShoppingList
 import it.gmstyle.getit.data.entities.ShoppingListWithItems
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOn
 
 class ShoppingListRepository(
     private val listDao: ShoppingListDao, private val itemDao: ListItemDao) {
 
-    val lists: Flow<List<ShoppingListWithItems>> = listDao.getAllWithItems()
-    fun getListById(listId: Int): Flow<ShoppingListWithItems> = listDao.getWithItemsByListId(listId)
+    val listsFlow: Flow<List<ShoppingListWithItems>> = listDao.getAllWithItemsFlow()
+    suspend fun getLists(): List<ShoppingListWithItems> = listDao.getAllWithItems()
+    fun getListByIdFlow(listId: Int): Flow<ShoppingListWithItems> = listDao.getWithItemsByListIdFlow(listId)
+    suspend fun getListById(listId: Int): ShoppingListWithItems = listDao.getWithItemsByListId(listId)
+
     suspend fun insertList(shoppingList: ShoppingList): Long = listDao.insert(shoppingList)
 
     suspend fun deleteList(shoppingList: ShoppingList) = listDao.delete(shoppingList)
