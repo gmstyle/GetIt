@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.ksp)
     alias(libs.plugins.secrets.gradle.plugin)
+    alias(libs.plugins.kotlinx.serialization)
 }
 
 android {
@@ -72,6 +73,7 @@ dependencies {
     implementation(libs.generativeai)
     implementation(libs.secrets.gradle.plugin)
     implementation(libs.engage.core)
+    implementation(libs.kotlinx.serialization.json)
     ksp(libs.room.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
