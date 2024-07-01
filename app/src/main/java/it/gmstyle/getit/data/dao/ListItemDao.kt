@@ -14,6 +14,9 @@ interface ListItemDao {
     @Query("SELECT * FROM ListItem where listId = :listId")
     fun getAllByListId(listId: Int): Flow<List<ListItem>>
 
+    @Query("SELECT * FROM ListItem where listId = :listId and id = :id")
+    suspend fun getByListIdAndId(listId: Int, id: Int): ListItem?
+
     @Insert
     suspend fun insert(listItem: ListItem): Long
 

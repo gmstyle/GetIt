@@ -59,7 +59,7 @@ class ChatViewModel(
                 handleResponse(generativeResponse)
 
             } catch (e: Exception) {
-                Log.e("TAG", "Error sending message: ${e}")
+                Log.e("CHAT_ERROR", "Error sending message: ${e.stackTrace}")
                 val errorMessage = e.message ?: "An unexpected error occurred"
                 _chatHistory.emit(_chatHistory.value - loadingMessage)
                 _chatHistory.emit(_chatHistory.value + ChatMessage(errorMessage, isUser = false))
