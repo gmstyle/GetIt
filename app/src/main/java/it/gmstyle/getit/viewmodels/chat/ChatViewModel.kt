@@ -17,12 +17,12 @@ import org.json.JSONObject
 
 class ChatViewModel(
     private val chatService: ChatService,
-    private val shoppingListRepository: ShoppingListRepository
 ) : ViewModel() {
 
     private var _chatHistory = MutableStateFlow<List<ChatMessage>>(emptyList())
     val chatHistory: StateFlow<List<ChatMessage>> = _chatHistory
     private val loadingMessage = ChatMessage("...", isUser = false)
+    private val geminiToolsHelper = chatService.geminiToolsHelper
 
     fun sendMessage(chatPrompt: ChatMessage) {
         viewModelScope.launch {
@@ -36,26 +36,74 @@ class ChatViewModel(
                 }
                 var generativeResponse = chatService.sendMessage(intputContent)
                 val functionDeclarations =
-                    chatService.generativeModel.tools?.flatMap { it.functionDeclarations }
-                // Verifica se la risposta contiene chiamate a funzioni
-                generativeResponse.functionCalls.let { functionCalls ->
+                    chatService.generativeModel.tools?.flatMap { it.functionDeclarations ?: emptyList() }
+
+                val functionCalls = generativeResponse.functionCalls
+                Log.d("CHAT_DEBUG", "Function calls: $functionCalls")
+
+                if (functionCalls.isNotEmpty()) {
+
                     functionCalls.forEach { functionCall ->
+                            val matchedFunction = functionDeclarations
+                                ?.first { functionDeclaration ->
+                                    functionDeclaration.name == functionCall.name }
+                                ?: throw InvalidStateException("Function not found: ${functionCall.name}")
 
-                        val matchedFunction = functionDeclarations
-                            ?.first { it.name == functionCall.name }
-                            ?: throw InvalidStateException("Function not found: ${functionCall.name}")
+                            // Esegue la funzione corrispondente
+                            val functionResponse = JSONObject()
+                            when(matchedFunction.name) {
+                                "createList" -> {
+                                    val listName = functionCall.args["listName"] ?: throw InvalidStateException("Missing argument: listName")
+                                    val result = geminiToolsHelper.createList(listName)
 
-                        // Esegue la funzione corrispondente
-                        val functionResponse: JSONObject = matchedFunction.execute(functionCall)
-                        Log.d("TAG", "Function response: $functionResponse")
-                        // Aggiunge la risposta della funzione alla risposta generativa
-                        generativeResponse = chatService.sendMessage(
-                            content(role = "function") {
-                                part(FunctionResponsePart(functionCall.name, functionResponse))
+                                    functionResponse.put("result", result)
+                                }
+                                "addItemsToList" -> {
+                                    val listName = functionCall.args["listId"] ?: throw InvalidStateException("Missing argument: listId")
+                                    val names = functionCall.args["names"] ?: throw InvalidStateException("Missing argument: names")
+                                    val result = geminiToolsHelper.addItemsToList(listName, names)
+
+                                    functionResponse.put("result", result)
+                                }
+                                "updateItems" -> {
+                                    val listName = functionCall.args["listId"] ?: throw InvalidStateException("Missing argument: listId")
+                                    val names = functionCall.args["names"] ?: throw InvalidStateException("Missing argument: names")
+                                    val completed = functionCall.args["completed"]  ?: throw InvalidStateException("Missing argument: completed")
+                                    val result = geminiToolsHelper.updateItems(listName, names, completed.toBoolean())
+
+                                    functionResponse.put("result", result)
+                                }
+                                "deleteItemsFromList" -> {
+                                    val listName = functionCall.args["listId"] ?: throw InvalidStateException("Missing argument: listId")
+                                    val names = functionCall.args["names"] ?: throw InvalidStateException("Missing argument: names")
+                                    val result = geminiToolsHelper.deleteItemsFromList(listName, names)
+
+                                    functionResponse.put("result", result)
+                                }
+                                "getListByName" -> {
+                                    val listName = functionCall.args["listName"] ?: throw InvalidStateException("Missing argument: listName")
+                                    val result = geminiToolsHelper.getListByName(listName)
+
+                                    functionResponse.put("result", result)
+                                }
+                                "getAllLists" -> {
+                                    val fake = functionCall.args["fake"] ?: throw InvalidStateException("Missing argument: fake")
+                                    val result = geminiToolsHelper.getAllLists( fake)
+                                    functionResponse.put("result", result)
+                                }
                             }
-                        )
-                    }
+                            // Aggiunge la risposta della funzione alla risposta generativa
+                            generativeResponse = chatService.sendMessage(
+                                content(role = "function") {
+                                    part(FunctionResponsePart(functionCall.name, functionResponse))
+                                }
+                            )
+                        }
+
+                } else {
+                    Log.d("CHAT_DEBUG", "No function calls found")
                 }
+
                 handleResponse(generativeResponse)
 
             } catch (e: Exception) {
@@ -66,6 +114,7 @@ class ChatViewModel(
             }
         }
     }
+
 
     private suspend fun handleResponse(generativeResponse: GenerateContentResponse) {
         generativeResponse.text?.let { outputContent ->

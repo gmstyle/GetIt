@@ -19,7 +19,7 @@ class GeminiToolsHelper(
     private val TAG = "GeminiToolsHelper"
     /// FUNZIONI CHE VENGONO ESEGUITE DALLE FUNZIONI DI SUPPORTO DEL MODELLO GENERATIVO
     // Crea una lista della spesa con il nome specificato
-    private suspend fun createList(listName: String): JSONObject {
+    suspend fun createList(listName: String): JSONObject {
         val listToCreate = ShoppingList(name = listName.trim())
         val listId = shoppingListRepository.insertList(listToCreate)
         val jsonResult = JSONObject().put("listId", listId.toString())
@@ -36,7 +36,7 @@ class GeminiToolsHelper(
         return jsonresult
     }
     // Aggiunge più elementi alla lista della spesa con l'ID specificato
-    private suspend fun addItemsToList(listId: String, names: String): JSONObject {
+     suspend fun addItemsToList(listId: String, names: String): JSONObject {
         val savedItemsIds = mutableListOf<Int>()
         val list = names.split(",")
         list.forEach { name ->
@@ -63,7 +63,7 @@ class GeminiToolsHelper(
         return jsonResult
     }
     // Elimina tutti gli elementi dalla lista della spesa con l'ID specificato
-    private suspend fun deleteItemsFromList(listId: String, names: String): JSONObject {
+     suspend fun deleteItemsFromList(listId: String, names: String): JSONObject {
         val list = names.split(",")
         list.forEach { name ->
             deleteItemFromList(listId, name)
@@ -81,7 +81,7 @@ class GeminiToolsHelper(
         return jsonResult
     }
 
-    private suspend fun updateItems(listId: String, items: String, completed: Boolean): JSONObject {
+     suspend fun updateItems(listId: String, items: String, completed: Boolean): JSONObject {
         val list = shoppingListRepository.getListById(listId.toInt())
         val itemsList = items.split(",")
         itemsList.forEach { itemName ->
@@ -96,7 +96,7 @@ class GeminiToolsHelper(
 
     }
 
-    private suspend fun getListByName(name: String) : JSONObject {
+     suspend fun getListByName(name: String) : JSONObject {
         val list = shoppingListRepository.getListByName(name)
             ?: return JSONObject().put("message", "Not found")
         val jsonArray = JSONArray()
@@ -115,7 +115,7 @@ class GeminiToolsHelper(
         return jsonResult
     }
 
-    private suspend fun getAllLists(fake: String) : JSONObject {
+     suspend fun getAllLists(fake: String) : JSONObject {
         val lists = shoppingListRepository.getLists()
         val listsArray = JSONArray()
         lists.forEach { list ->
@@ -143,46 +143,47 @@ class GeminiToolsHelper(
     private val createListTool = defineFunction(
         name = "createList",
         description = "Crea una lista della spesa su richiesta dell'utente",
-        Schema.str("listName", "Il nome della lista della spesa"),
-    ){ listName ->
-        createList(listName)
-    }
+        parameters = listOf(Schema.str("listName", "Il nome della lista della spesa"),),
+        requiredParameters = listOf("listName")
+    )
     // Definizione della funzione "addItemsToList" per il modello generativo
     private val addItemsToListTool = defineFunction(
         name = "addItemsToList",
         description = "Aggiunge più elementi a una lista della spesa esistente. L'ID della lista della spesa è ottenuto dalla funzione 'createList' ed è contenuto nel campo 'listId' del JSON restituito.",
-        Schema.str("listId", "L'ID della lista della spesa, ottenuto dal campo 'listId' del JSON restituito dalla funzione 'createList'"),
-        Schema.str("names", "I nomi degli elementi da aggiungere alla lista della spesa separati da virgola"),
-    ){ listId, names ->
-        addItemsToList(listId, names)
-    }
+        parameters = listOf(
+            Schema.str("listId", "L'ID della lista della spesa, ottenuto dal campo 'listId' del JSON restituito dalla funzione 'createList'"),
+            Schema.str("names", "I nomi degli elementi da aggiungere alla lista della spesa separati da virgola"),
+        ),
+       requiredParameters = listOf("listId", "names")
+    )
     // Definizione della funzione "deleteAllItemsFromList" per il modello generativo
     private val deleteItemsFromListTool = defineFunction(
         name = "deleteItemsFromList",
         description = "Elimina più elementi dalla lista della spesa esistente. L'ID della lista della spesa è ottenuto dalla funzione 'createList' ed è contenuto nel campo 'listId' del JSON restituito.",
-        Schema.str("listId", "L'ID della lista della spesa, ottenuto dal campo 'listId' del JSON restituito dalla funzione 'createList'"),
-        Schema.str("names", "I nomi degli elementi da eliminare dalla lista della spesa separati da virgola"),
-    ){ listId, names ->
-        deleteItemsFromList(listId, names)
-    }
+        parameters = listOf(
+            Schema.str("listId", "L'ID della lista della spesa, ottenuto dal campo 'listId' del JSON restituito dalla funzione 'createList'"),
+            Schema.str("names", "I nomi degli elementi da eliminare dalla lista della spesa separati da virgola"),
+        ),
+        requiredParameters = listOf("listId", "names")
+    )
     // Definizione della funzione "updateItems" per il modello generativo
     //TODO: da verificare
     private val updateItemsTool = defineFunction(
         name = "updateItems",
         description = "Aggiorna più elementi della lista della spesa esistente. L'ID della lista della spesa può arrivare dalle funzioni 'createList', 'getListByListName' o 'getAllLists'. Il campo si chiama 'listId' nel JSON restituito.",
-        Schema.str("listId", "L'ID della lista della spesa, ottenuto dal campo 'listId' del JSON restituito dalla funzione 'createList' o 'getListByListName' o 'getAllLists'"),
-        Schema.str("items", "Gli elementi da aggiornare nella lista della spesa separati da virgola. Ogni elemento è composto da ID, nome e completato separati da due punti"),
-        Schema.bool("completed", "Se l'elemento è stato completato o meno")
-    ){ listId, items, completed ->
-        updateItems(listId, items, completed)
-    }
+        parameters = listOf(
+            Schema.str("listId", "L'ID della lista della spesa, ottenuto dal campo 'listId' del JSON restituito dalla funzione 'createList' o 'getListByListName' o 'getAllLists'"),
+            Schema.str("items", "Gli elementi da aggiornare nella lista della spesa separati da virgola. Ogni elemento è composto da ID, nome e completato separati da due punti"),
+            Schema.bool("completed", "Se l'elemento è stato completato o meno")
+        ),
+        requiredParameters = listOf("listId", "items", "completed")
+    )
     private val getListByListName = defineFunction(
         name = "getListByListName",
         description = "Recupera una lista dal suo nome. La lista restituita contiene l'ID della lista, il nome della lista e gli elementi della lista.",
-        Schema.str("listName", "Il nome della lista da trovare"),
-    ) { listName ->
-        getListByName(listName)
-    }
+       parameters = listOf( Schema.str("listName", "Il nome della lista da trovare"),),
+        requiredParameters = listOf("listName")
+    )
 
     private val getAllListsTool = defineFunction(
         name = "getAllLists",
@@ -191,10 +192,11 @@ class GeminiToolsHelper(
                 "Alla chiave lists restituisce un array di oggetti JSON, ognuno dei quali rappresenta una lista della spesa con i suoi elementi." +
                 "Le chiavi di ogni oggetto JSON sono listId, listName e listItems. " +
                 "Il parametro listId ti serve per aggiungere o eliminare elementi da una lista della spesa sfruttando le funzioni 'addItemsToList' e 'deleteItemsFromList' se l'utente te lo chiede durante la conversazione.",
-        Schema.str("fake", "Parametro fake per evitare errori di validazione del modello generativo")
-    ) {
-        getAllLists(it)
-    }
+        parameters = listOf(
+            Schema.str("fake", "Parametro fake per evitare errori di validazione del modello generativo")
+        ),
+        requiredParameters = listOf("fake")
+    )
 
     private val _tool = Tool(listOf(
         createListTool,
