@@ -3,6 +3,7 @@ package it.gmstyle.getit.viewmodels.chat
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.ai.client.generativeai.type.FunctionCallPart
 import com.google.ai.client.generativeai.type.FunctionResponsePart
 import com.google.ai.client.generativeai.type.GenerateContentResponse
 import com.google.ai.client.generativeai.type.InvalidStateException
@@ -23,6 +24,8 @@ class ChatViewModel(
     val chatHistory: StateFlow<List<ChatMessage>> = _chatHistory
     private val loadingMessage = ChatMessage("...", isUser = false)
     private val geminiToolsHelper = chatService.geminiToolsHelper
+    private val functionDeclarations =
+        chatService.generativeModel.tools?.flatMap { it.functionDeclarations ?: emptyList() }
 
     fun sendMessage(chatPrompt: ChatMessage) {
         viewModelScope.launch {
@@ -35,73 +38,14 @@ class ChatViewModel(
                     chatPrompt.images?.forEach { image(it) }
                 }
                 var generativeResponse = chatService.sendMessage(intputContent)
-                val functionDeclarations =
-                    chatService.generativeModel.tools?.flatMap { it.functionDeclarations ?: emptyList() }
 
                 val functionCalls = generativeResponse.functionCalls
                 Log.d("CHAT_DEBUG", "Function calls: $functionCalls")
 
-                if (functionCalls.isNotEmpty()) {
-
-                    functionCalls.forEach { functionCall ->
-                            val matchedFunction = functionDeclarations
-                                ?.first { functionDeclaration ->
-                                    functionDeclaration.name == functionCall.name }
-                                ?: throw InvalidStateException("Function not found: ${functionCall.name}")
-
-                            // Esegue la funzione corrispondente
-                            val functionResponse = JSONObject()
-                            when(matchedFunction.name) {
-                                "createList" -> {
-                                    val listName = functionCall.args["listName"] ?: throw InvalidStateException("Missing argument: listName")
-                                    val result = geminiToolsHelper.createList(listName)
-
-                                    functionResponse.put("result", result)
-                                }
-                                "addItemsToList" -> {
-                                    val listName = functionCall.args["listId"] ?: throw InvalidStateException("Missing argument: listId")
-                                    val names = functionCall.args["names"] ?: throw InvalidStateException("Missing argument: names")
-                                    val result = geminiToolsHelper.addItemsToList(listName, names)
-
-                                    functionResponse.put("result", result)
-                                }
-                                "updateItems" -> {
-                                    val listName = functionCall.args["listId"] ?: throw InvalidStateException("Missing argument: listId")
-                                    val names = functionCall.args["names"] ?: throw InvalidStateException("Missing argument: names")
-                                    val completed = functionCall.args["completed"]  ?: throw InvalidStateException("Missing argument: completed")
-                                    val result = geminiToolsHelper.updateItems(listName, names, completed.toBoolean())
-
-                                    functionResponse.put("result", result)
-                                }
-                                "deleteItemsFromList" -> {
-                                    val listName = functionCall.args["listId"] ?: throw InvalidStateException("Missing argument: listId")
-                                    val names = functionCall.args["names"] ?: throw InvalidStateException("Missing argument: names")
-                                    val result = geminiToolsHelper.deleteItemsFromList(listName, names)
-
-                                    functionResponse.put("result", result)
-                                }
-                                "getListByName" -> {
-                                    val listName = functionCall.args["listName"] ?: throw InvalidStateException("Missing argument: listName")
-                                    val result = geminiToolsHelper.getListByName(listName)
-
-                                    functionResponse.put("result", result)
-                                }
-                                "getAllLists" -> {
-                                    val fake = functionCall.args["fake"] ?: throw InvalidStateException("Missing argument: fake")
-                                    val result = geminiToolsHelper.getAllLists( fake)
-                                    functionResponse.put("result", result)
-                                }
-                            }
-                            // Aggiunge la risposta della funzione alla risposta generativa
-                            generativeResponse = chatService.sendMessage(
-                                content(role = "function") {
-                                    part(FunctionResponsePart(functionCall.name, functionResponse))
-                                }
-                            )
-                        }
-
-                } else {
-                    Log.d("CHAT_DEBUG", "No function calls found")
+                functionCalls.forEach { functionCall ->
+                    handleFunctionCall(functionCall, generativeResponse)?.let { updatedResponse ->
+                        generativeResponse = updatedResponse
+                    }
                 }
 
                 handleResponse(generativeResponse)
@@ -113,6 +57,72 @@ class ChatViewModel(
                 _chatHistory.emit(_chatHistory.value + ChatMessage(errorMessage, isUser = false))
             }
         }
+    }
+
+    private suspend fun handleFunctionCall(
+        functionCall: FunctionCallPart,
+        generativeResponse: GenerateContentResponse
+    ): GenerateContentResponse? {
+        val matchedFunction = functionDeclarations
+            ?.firstOrNull { it.name == functionCall.name }
+            ?: return null // Ignora funzioni non trovate
+
+        val functionResponse = JSONObject().apply {
+            when (matchedFunction.name) {
+                "createList" -> {
+                    val listName = functionCall.args?.get("listName")
+                        ?: throw InvalidStateException("Missing argument: listName")
+                    put("result", geminiToolsHelper.createList(listName))
+                }
+
+                "addItemsToList" -> {
+                    val listName = functionCall.args?.get("listId")
+                        ?: throw InvalidStateException("Missing argument: listId")
+                    val names = functionCall.args?.get("names")
+                        ?: throw InvalidStateException("Missing argument: names")
+                    put("result", geminiToolsHelper.addItemsToList(listName, names))
+                }
+
+                "updateItems" -> {
+                    val listName = functionCall.args?.get("listId")
+                        ?: throw InvalidStateException("Missing argument: listId")
+                    val names = functionCall.args?.get("names")
+                        ?: throw InvalidStateException("Missing argument: names")
+                    val completed = functionCall.args?.get("completed")
+                        ?: throw InvalidStateException("Missing argument: completed")
+                    put(
+                        "result",
+                        geminiToolsHelper.updateItems(listName, names, completed.toBoolean())
+                    )
+                }
+
+                "deleteItemsFromList" -> {
+                    val listName = functionCall.args?.get("listId")
+                        ?: throw InvalidStateException("Missing argument: listId")
+                    val names = functionCall.args?.get("names")
+                        ?: throw InvalidStateException("Missing argument: names")
+                    put("result", geminiToolsHelper.deleteItemsFromList(listName, names))
+                }
+
+                "getListByName" -> {
+                    val listName = functionCall.args?.get("listName")
+                        ?: throw InvalidStateException("Missing argument: listName")
+                    put("result", geminiToolsHelper.getListByName(listName))
+                }
+
+                "getAllLists" -> {
+                    val fake = functionCall.args?.get("fake")
+                        ?: throw InvalidStateException("Missing argument: fake")
+                    put("result", geminiToolsHelper.getAllLists(fake))
+                }
+            }
+        }
+
+        return chatService.sendMessage(
+            content(role = "function") {
+                part(FunctionResponsePart(functionCall.name, functionResponse))
+            }
+        )
     }
 
 
