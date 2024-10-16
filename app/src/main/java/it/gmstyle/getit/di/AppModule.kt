@@ -10,7 +10,7 @@ import it.gmstyle.getit.services.helpers.GeminiToolsHelper
 import it.gmstyle.getit.viewmodels.chat.ChatViewModel
 import it.gmstyle.getit.viewmodels.shoppinglist.ShoppingListViewModel
 import it.gmstyle.getit.viewmodels.shoppinglists.HomeViewModel
-import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.module.dsl.*
 import org.koin.dsl.module
 
 val appModule = module {

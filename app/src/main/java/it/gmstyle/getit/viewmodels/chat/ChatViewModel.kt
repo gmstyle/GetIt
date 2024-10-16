@@ -40,7 +40,9 @@ class ChatViewModel(
                 var generativeResponse = chatService.sendMessage(intputContent)
 
                 val functionCalls = generativeResponse.functionCalls
-                Log.d("CHAT_DEBUG", "Function calls: $functionCalls")
+               // logga i nomi delle funzioni chiamate
+                Log.d("CHAT_DEBUG", "Function calls: ${functionCalls.map { it.name }
+                }")
 
                 functionCalls.forEach { functionCall ->
                     handleFunctionCall(functionCall, generativeResponse)?.let { updatedResponse ->
@@ -86,8 +88,8 @@ class ChatViewModel(
                 "updateItems" -> {
                     val listName = functionCall.args["listId"]
                         ?: throw InvalidStateException("Missing argument: listId")
-                    val names = functionCall.args["names"]
-                        ?: throw InvalidStateException("Missing argument: names")
+                    val names = functionCall.args["items"]
+                        ?: throw InvalidStateException("Missing argument: items")
                     val completed = functionCall.args["completed"]
                         ?: throw InvalidStateException("Missing argument: completed")
                     put(

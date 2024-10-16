@@ -12,6 +12,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
 import org.json.JSONArray
 import org.json.JSONObject
+import java.util.Locale
 
 class GeminiToolsHelper(
     private val shoppingListRepository: ShoppingListRepository
@@ -142,7 +143,9 @@ class GeminiToolsHelper(
     // Definizione della funzione "createList" per il modello generativo
     private val createListTool = defineFunction(
         name = "createList",
-        description = "Crea una lista della spesa su richiesta dell'utente",
+        description = "Crea una lista della spesa su richiesta dell'utente. " +
+                "Il nome della lista della spesa è richiesto come parametro. " +
+                "Il campo 'listId' del JSON restituito contiene l'ID della lista della spesa appena creata.",
         parameters = listOf(Schema.str("listName", "Il nome della lista della spesa"),),
         requiredParameters = listOf("listName")
     )
@@ -170,16 +173,16 @@ class GeminiToolsHelper(
     //TODO: da verificare
     private val updateItemsTool = defineFunction(
         name = "updateItems",
-        description = "Aggiorna più elementi della lista della spesa esistente. L'ID della lista della spesa può arrivare dalle funzioni 'createList', 'getListByListName' o 'getAllLists'. Il campo si chiama 'listId' nel JSON restituito.",
+        description = "Aggiorna più elementi della lista della spesa esistente. L'ID della lista della spesa può arrivare dalle funzioni 'createList', 'getListByName' o 'getAllLists'. Il campo si chiama 'listId' nel JSON restituito.",
         parameters = listOf(
-            Schema.str("listId", "L'ID della lista della spesa, ottenuto dal campo 'listId' del JSON restituito dalla funzione 'createList' o 'getListByListName' o 'getAllLists'"),
+            Schema.str("listId", "L'ID della lista della spesa, ottenuto dal campo 'listId' del JSON restituito dalla funzione 'createList' o 'getListByName' o 'getAllLists'"),
             Schema.str("items", "Gli elementi da aggiornare nella lista della spesa separati da virgola. Ogni elemento è composto da ID, nome e completato separati da due punti"),
             Schema.bool("completed", "Se l'elemento è stato completato o meno")
         ),
         requiredParameters = listOf("listId", "items", "completed")
     )
-    private val getListByListName = defineFunction(
-        name = "getListByListName",
+    private val getListByName = defineFunction(
+        name = "getListByName",
         description = "Recupera una lista dal suo nome. La lista restituita contiene l'ID della lista, il nome della lista e gli elementi della lista.",
        parameters = listOf( Schema.str("listName", "Il nome della lista da trovare"),),
         requiredParameters = listOf("listName")
@@ -202,7 +205,7 @@ class GeminiToolsHelper(
         createListTool,
         addItemsToListTool,
         deleteItemsFromListTool,
-        getListByListName,
+        getListByName,
         getAllListsTool,
         updateItemsTool
     ))

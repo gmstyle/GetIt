@@ -42,6 +42,7 @@ interface ShoppingListDao {
     @Query("DELETE FROM ShoppingList")
     suspend fun deleteAll()
 
+    @Transaction
     @Query("SELECT * FROM ShoppingList WHERE name = :name")
     suspend fun getWithItemsByListName(name: String): ShoppingListWithItems?
 }
