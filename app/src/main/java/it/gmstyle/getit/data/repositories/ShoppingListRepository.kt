@@ -29,5 +29,4 @@ class ShoppingListRepository(
 
     suspend fun updateItem(listItem: ListItem) = itemDao.update(listItem)
     suspend fun getListByName(name: String): ShoppingListWithItems? = listDao.getWithItemsByListName(name)
-    suspend fun getItemByListIdAndId(listId: Int, id: Int): ListItem? = itemDao.getByListIdAndId(listId, id)
 }
