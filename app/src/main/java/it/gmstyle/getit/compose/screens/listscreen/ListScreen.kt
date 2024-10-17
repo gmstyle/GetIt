@@ -2,6 +2,7 @@ package it.gmstyle.getit.compose.screens.listscreen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -115,61 +116,85 @@ fun ShoppingListScreen(
             )
         }
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .padding(horizontal = 8.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            // Nome lista e pulsante di salvataggio
-            ListNameBox(
-                editableListName = editableListName,
-                onListNameChange = { newName -> editableListName = newName },
-                onSaveList = { newName ->
-                    saveList(newName, uiState, editableListName, viewModel)
-                }
-            )
+        ShoppingListContent(
+            innerPadding = innerPadding,
+            editableListName = editableListName,
+            onListNameChange = { newName -> editableListName = newName },
+            onSaveList = { newName ->
+                saveList(newName, uiState, editableListName, viewModel)
+            },
+            uiState = uiState,
+            id = id,
+            viewModel = viewModel
+        )
+    }
+}
 
-            // Riga per aggiungere un nuovo elemento alla lista
-            NewItemBox(
-                enabled = id != 0
-            ) { itemName ->
-                val listItem = ListItem(listId = id, name = itemName)
-                viewModel.saveItem(listItem)
+@Composable
+fun ShoppingListContent(
+    innerPadding: PaddingValues,
+    editableListName: String,
+    onListNameChange: (String) -> Unit,
+    onSaveList: (String) -> Unit,
+    uiState: ShoppingListUiState,
+    id: Int,
+    viewModel: ShoppingListViewModel
+) {
+    var idState by remember { mutableIntStateOf(id) }
+    Column(
+        modifier = Modifier
+            .padding(innerPadding)
+            .padding(horizontal = 8.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        ListNameBox(
+            editableListName = editableListName,
+            onListNameChange = onListNameChange,
+            onSaveList = onSaveList,
+            isError = uiState is ShoppingListUiState.Error
+        )
+
+        when (uiState) {
+            is ShoppingListUiState.Success -> {
+                NewItemBox(enabled = idState != 0) { itemName ->
+                    val listItem = ListItem(listId = idState, name = itemName)
+                    viewModel.saveItem(listItem)
+                }
             }
+            is ShoppingListUiState.Error -> {
+                ErrorMessage(uiState.message)
+            }
+            is ShoppingListUiState.Loading -> {
+                CommonLoader()
+            }
+            else -> {}
+        }
 
-            // Elementi della lista
-            when (uiState) {
-                is ShoppingListUiState.Loading -> {
-                    CommonLoader()
+        if (uiState is ShoppingListUiState.Success) {
+            val listItems = uiState.listWithItems.items
+            idState = uiState.listWithItems.list.id
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(listItems) { item ->
+                    ItemBox(
+                        item = item,
+                        onUpdateItem = viewModel::updateItem,
+                        onDelete = viewModel::deleteItem
+                    )
                 }
-
-                is ShoppingListUiState.Error -> {
-                    Text((uiState as ShoppingListUiState.Error).message)
-                }
-
-                is ShoppingListUiState.Success -> {
-                    val listItems = (uiState as ShoppingListUiState.Success).listWithItems.items
-                    id = (uiState as ShoppingListUiState.Success).listWithItems.list.id
-                    LazyColumn(
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                       // reverseLayout = true
-                    ) {
-                        // Elenco esistente di elementi
-                        items(listItems) { item ->
-                            ItemBox(
-                                item = item,
-                                onUpdateItem = viewModel::updateItem,
-                                onDelete = viewModel::deleteItem
-                            )
-                        }
-                    }
-                }
-
-                else -> {}
             }
         }
     }
+}
+
+@Composable
+fun ErrorMessage(message: String) {
+    Text(
+        text = message,
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.error
+    )
 }
 
 private fun saveList(

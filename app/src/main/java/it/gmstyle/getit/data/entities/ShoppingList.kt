@@ -1,12 +1,13 @@
 package it.gmstyle.getit.data.entities
 
-import androidx.room.Embedded
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
-import androidx.room.Relation
 import kotlinx.serialization.Serializable
 
-@Entity
+@Entity(
+    indices = [Index(value = ["name"], unique = true)]
+)
 @Serializable
 data class ShoppingList(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,

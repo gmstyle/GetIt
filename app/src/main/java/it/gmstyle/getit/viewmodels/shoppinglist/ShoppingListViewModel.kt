@@ -34,10 +34,16 @@ class ShoppingListViewModel(private val repository: ShoppingListRepository) : Vi
     fun saveList(list: ShoppingList) {
         var newListId = 0
         viewModelScope.launch {
-            val id = repository.insertList(list)
-            newListId = id.toInt()
+            val result = repository.insertList(list)
+            if(result.isFailure){
+                _uiState.value = ShoppingListUiState.Error("List name already exists, please choose another name")
+            } else {
+                newListId = result.getOrNull()?.toInt() ?: 0
+            }
         }.invokeOnCompletion {
-            getShoppingListWithItems(newListId)
+            if (newListId != 0) {
+                getShoppingListWithItems(newListId)
+            }
         }
     }
 

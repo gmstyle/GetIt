@@ -20,7 +20,8 @@ val appModule = module {
             get(),
             ShoppingListDatabase::class.java,
             "shopping_list_database"
-        ).build()
+        ).addMigrations(ShoppingListDatabase.MIGRATION_1_2)
+            .build()
     }
     ///Daos
     single<ShoppingListDao> {

@@ -30,7 +30,7 @@ interface ShoppingListDao {
     @Query("SELECT * FROM ShoppingList WHERE id = :id")
     suspend fun getWithItemsByListId(id: Int): ShoppingListWithItems
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert()
     suspend fun insert(shoppingList: ShoppingList): Long
 
     @Delete

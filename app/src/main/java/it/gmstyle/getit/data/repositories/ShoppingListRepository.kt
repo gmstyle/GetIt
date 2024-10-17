@@ -15,7 +15,14 @@ class ShoppingListRepository(
     fun getListByIdFlow(listId: Int): Flow<ShoppingListWithItems> = listDao.getWithItemsByListIdFlow(listId)
     suspend fun getListById(listId: Int): ShoppingListWithItems = listDao.getWithItemsByListId(listId)
 
-    suspend fun insertList(shoppingList: ShoppingList): Long = listDao.insert(shoppingList)
+    suspend fun insertList(shoppingList: ShoppingList): Result <Long> {
+        return try {
+            val id = listDao.insert(shoppingList)
+            Result.success(id)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 
     suspend fun deleteList(shoppingList: ShoppingList) = listDao.delete(shoppingList)
 

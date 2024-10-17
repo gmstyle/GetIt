@@ -1,6 +1,8 @@
 package it.gmstyle.getit.compose.screens.listscreen.composables
 
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material3.Icon
@@ -21,6 +23,7 @@ fun ListNameBox(
     editableListName: String,
     onListNameChange: (String) -> Unit,
     onSaveList: (String) -> Unit,
+    isError: Boolean = false
 ) {
     var hasBeenFocused by remember { mutableStateOf(false) }
     Row {
@@ -39,10 +42,19 @@ fun ListNameBox(
                     contentDescription = null
                 )
             },
+            isError =  isError,
             value = editableListName,
             onValueChange = { newName ->
                 onListNameChange(newName)
             },
+            keyboardOptions = KeyboardOptions(
+                imeAction = androidx.compose.ui.text.input.ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    onSaveList(editableListName)
+                }
+            ),
             placeholder = { Text(stringResource(id = R.string.placeholder_list_name)) }
         )
     }
