@@ -160,7 +160,7 @@ class GeminiToolsHelper(
     // Definizione della funzione "addItemsToList" per il modello generativo
     private val addItems = defineFunction(
         name = "addItems",
-        description = "Aggiunge più elementi a una lista della spesa esistente. L'ID della lista della spesa è ottenuto dalla funzione 'createList' ed è contenuto nel campo 'listId' del JSON restituito.",
+        description = "Aggiunge più elementi a una lista della spesa esistente. L'ID della lista della spesa può essere ottenuto dalla funzione 'createList' ed è contenuto nel campo 'listId' del JSON restituito, oppure dalla funzione 'getListByName'.",
         parameters = listOf(
             Schema.str("listId", "L'ID della lista della spesa, ottenuto dal campo 'listId' del JSON restituito dalla funzione 'createList'"),
             Schema.str("names", "I nomi degli elementi da aggiungere alla lista della spesa separati da virgola"),

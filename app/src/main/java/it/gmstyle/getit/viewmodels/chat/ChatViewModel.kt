@@ -26,6 +26,26 @@ class ChatViewModel(
     private val functionDeclarations =
         chatService.generativeModel.tools?.flatMap { it.functionDeclarations ?: emptyList() }
 
+    init {
+        sendWelcomeMessage()
+    }
+
+    private fun sendWelcomeMessage() {
+        viewModelScope.launch {
+            try {
+                val welcomeContent = content() {
+                    text("Manda un messaggio di benvenuto spiegando cosa puoi fare. Inizializza le funzioni che sei in grado di gestire: createList, addItems, updateItems, deleteItems, getListByName, getAllLists.")
+                }
+                val generativeResponse = chatService.sendMessage(welcomeContent)
+                handleResponse(generativeResponse)
+            } catch (e: Exception) {
+                Log.e("CHAT_ERROR", "Error sending welcome message: ${e.stackTrace}")
+                val errorMessage = e.message ?: "An unexpected error occurred"
+                _chatHistory.emit(_chatHistory.value + ChatMessage(errorMessage, isUser = false))
+            }
+        }
+    }
+
     fun sendMessage(chatPrompt: ChatMessage) {
         viewModelScope.launch {
             _chatHistory.emit(_chatHistory.value + chatPrompt)
@@ -76,11 +96,11 @@ class ChatViewModel(
                 }
 
                 "addItems" -> {
-                    val listName = functionCall.args["listId"]
+                    val listId = functionCall.args["listId"]
                         ?: throw InvalidStateException("Missing argument: listId")
                     val names = functionCall.args["names"]
                         ?: throw InvalidStateException("Missing argument: names")
-                    put("result", geminiToolsHelper.addItems(listName, names))
+                    put("result", geminiToolsHelper.addItems(listId, names))
                 }
 
                 "updateItems" -> {
