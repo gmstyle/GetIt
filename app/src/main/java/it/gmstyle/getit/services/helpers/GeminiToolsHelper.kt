@@ -12,7 +12,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
 import org.json.JSONArray
 import org.json.JSONObject
-import java.util.Locale
 
 class GeminiToolsHelper(
     private val shoppingListRepository: ShoppingListRepository
@@ -29,7 +28,7 @@ class GeminiToolsHelper(
     }
 
     // Aggiunge un elemento alla lista della spesa con l'ID specificato
-    private suspend fun addItemToList(listId: String, name: String): JSONObject {
+    private suspend fun addItem(listId: String, name: String): JSONObject {
         val item = ListItem(listId = listId.toInt(), name = name)
         val itemId = shoppingListRepository.insertItem(item)
         val jsonresult = JSONObject().put("itemId", itemId)
@@ -37,11 +36,11 @@ class GeminiToolsHelper(
         return jsonresult
     }
     // Aggiunge più elementi alla lista della spesa con l'ID specificato
-     suspend fun addItemsToList(listId: String, names: String): JSONObject {
+     suspend fun addItems(listId: String, names: String): JSONObject {
         val savedItemsIds = mutableListOf<Int>()
         val list = names.split(",")
         list.forEach { name ->
-            val json = addItemToList(listId, name.trim())
+            val json = addItem(listId, name.trim())
             savedItemsIds.add(json.getInt("itemId"))
         }
         val jsonResult = JSONObject().put("itemIds", savedItemsIds)
@@ -50,7 +49,7 @@ class GeminiToolsHelper(
     }
 
     // Elimina un elemento dalla lista della spesa con l'ID specificato
-    private suspend fun deleteItemFromList(listId: String, name: String): JSONObject {
+    private suspend fun deleteItem(listId: String, name: String): JSONObject {
         val list = shoppingListRepository.getListById(listId.toInt())
         val item = list.items.find { it.name == name }
         val jsonResult = JSONObject()
@@ -64,31 +63,40 @@ class GeminiToolsHelper(
         return jsonResult
     }
     // Elimina tutti gli elementi dalla lista della spesa con l'ID specificato
-     suspend fun deleteItemsFromList(listId: String, names: String): JSONObject {
+     suspend fun deleteItems(listId: String, names: String): JSONObject {
         val list = names.split(",")
         list.forEach { name ->
-            deleteItemFromList(listId, name)
+            deleteItem(listId, name)
         }
         val jsonResult = JSONObject().put("message", "Elementi eliminati con successo")
         Log.d(TAG, "deleteItemsFromList: $jsonResult")
         return jsonResult
     }
 
-    private suspend fun updateItem(listId: String, itemId: String, name: String, completed: Boolean): JSONObject {
-        val item = ListItem(id = itemId.toInt(), listId = listId.toInt(), name = name, completed = completed)
+    private suspend fun updateItem(item: ListItem): JSONObject {
         shoppingListRepository.updateItem(item)
         val jsonResult = JSONObject().put("message", "Elemento aggiornato con successo")
         Log.d(TAG, "updateItem: $jsonResult")
         return jsonResult
     }
 
-     suspend fun updateItems(listId: String, items: String, completed: Boolean): JSONObject {
+     suspend fun updateItems(listId: String, items: String): JSONObject {
         val list = shoppingListRepository.getListById(listId.toInt())
         val itemsList = items.split(",")
-        itemsList.forEach { itemName ->
-            val item = list.items.find { it.name == itemName }
-            if (item != null) {
-                updateItem(listId, item.id.toString(), item.name, completed)
+        itemsList.forEach { item ->
+            val itemSplit = item.split(":")
+            val id = itemSplit[0]
+            val newName = itemSplit[1]
+            val newCompleted = itemSplit[2].toBoolean()
+            val foundItem = list.items.find { it.id == id.toInt() }
+            if (foundItem != null) {
+                val updatedItem = ListItem(
+                    id = foundItem.id,
+                    listId = foundItem.listId,
+                    name = newName,
+                    completed = newCompleted
+                )
+                updateItem(updatedItem)
             }
         }
         val jsonResult = JSONObject().put("updatedList", Json.encodeToJsonElement<ShoppingListWithItems>(list))
@@ -150,8 +158,8 @@ class GeminiToolsHelper(
         requiredParameters = listOf("listName")
     )
     // Definizione della funzione "addItemsToList" per il modello generativo
-    private val addItemsToListTool = defineFunction(
-        name = "addItemsToList",
+    private val addItems = defineFunction(
+        name = "addItems",
         description = "Aggiunge più elementi a una lista della spesa esistente. L'ID della lista della spesa è ottenuto dalla funzione 'createList' ed è contenuto nel campo 'listId' del JSON restituito.",
         parameters = listOf(
             Schema.str("listId", "L'ID della lista della spesa, ottenuto dal campo 'listId' del JSON restituito dalla funzione 'createList'"),
@@ -160,8 +168,8 @@ class GeminiToolsHelper(
        requiredParameters = listOf("listId", "names")
     )
     // Definizione della funzione "deleteAllItemsFromList" per il modello generativo
-    private val deleteItemsFromListTool = defineFunction(
-        name = "deleteItemsFromList",
+    private val deleteItems = defineFunction(
+        name = "deleteItems",
         description = "Elimina più elementi dalla lista della spesa esistente. L'ID della lista della spesa è ottenuto dalla funzione 'createList' ed è contenuto nel campo 'listId' del JSON restituito.",
         parameters = listOf(
             Schema.str("listId", "L'ID della lista della spesa, ottenuto dal campo 'listId' del JSON restituito dalla funzione 'createList'"),
@@ -177,13 +185,12 @@ class GeminiToolsHelper(
         parameters = listOf(
             Schema.str("listId", "L'ID della lista della spesa, ottenuto dal campo 'listId' del JSON restituito dalla funzione 'createList' o 'getListByName' o 'getAllLists'"),
             Schema.str("items", "Gli elementi da aggiornare nella lista della spesa separati da virgola. Ogni elemento è composto da ID, nome e completato separati da due punti"),
-            Schema.bool("completed", "Se l'elemento è stato completato o meno")
         ),
-        requiredParameters = listOf("listId", "items", "completed")
+        requiredParameters = listOf("listId", "items")
     )
     private val getListByName = defineFunction(
         name = "getListByName",
-        description = "Recupera una lista dal suo nome. La lista restituita contiene l'ID della lista, il nome della lista e gli elementi della lista.",
+        description = "Recupera una lista dal suo nome. La lista restituita contiene l'ID della lista, il nome della lista e gli elementi della lista. Distingui gli elementi comopletati da quelli ancora da acquistare.",
        parameters = listOf( Schema.str("listName", "Il nome della lista da trovare"),),
         requiredParameters = listOf("listName")
     )
@@ -203,8 +210,8 @@ class GeminiToolsHelper(
 
     private val _tool = Tool(listOf(
         createListTool,
-        addItemsToListTool,
-        deleteItemsFromListTool,
+        addItems,
+        deleteItems,
         getListByName,
         getAllListsTool,
         updateItemsTool
