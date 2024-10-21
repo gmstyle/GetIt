@@ -17,6 +17,8 @@ class GeminiToolsHelper(
     private val shoppingListRepository: ShoppingListRepository
 ) {
     private val TAG = "GeminiToolsHelper"
+    val tools get() = listOf(_tool)
+
     /// FUNZIONI CHE VENGONO ESEGUITE DALLE FUNZIONI DI SUPPORTO DEL MODELLO GENERATIVO
     // Crea una lista della spesa con il nome specificato
     suspend fun createList(listName: String): JSONObject {
@@ -217,6 +219,6 @@ class GeminiToolsHelper(
         updateItemsTool
     ))
 
-    val tools get() = listOf(_tool)
+
 
 }
