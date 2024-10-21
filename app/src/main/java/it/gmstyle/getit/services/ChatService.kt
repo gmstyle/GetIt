@@ -61,6 +61,7 @@ class ChatService(
     private val chat = _generativeModel.startChat(chatHistory)
 
     suspend fun sendMessage(content: Content): GenerateContentResponse {
-        return chat.sendMessage(content)
+        val response = chat.sendMessage(content)
+        return response
     }
 }

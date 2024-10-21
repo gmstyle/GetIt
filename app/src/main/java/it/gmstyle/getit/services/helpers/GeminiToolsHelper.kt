@@ -151,7 +151,7 @@ class GeminiToolsHelper(
 
     /// FUNZIONI DI SUPPORTO PER IL MODELLO GENERATIVO
     // Definizione della funzione "createList" per il modello generativo
-    private val createListTool = defineFunction(
+    private val createListFunc = defineFunction(
         name = "createList",
         description = "Crea una lista della spesa su richiesta dell'utente. " +
                 "Il nome della lista della spesa è richiesto come parametro. " +
@@ -160,7 +160,7 @@ class GeminiToolsHelper(
         requiredParameters = listOf("listName")
     )
     // Definizione della funzione "addItemsToList" per il modello generativo
-    private val addItems = defineFunction(
+    private val addItemsFunc = defineFunction(
         name = "addItems",
         description = "Aggiunge più elementi a una lista della spesa esistente. L'ID della lista della spesa può essere ottenuto dalla funzione 'createList' ed è contenuto nel campo 'listId' del JSON restituito, oppure dalla funzione 'getListByName'.",
         parameters = listOf(
@@ -170,7 +170,7 @@ class GeminiToolsHelper(
        requiredParameters = listOf("listId", "names")
     )
     // Definizione della funzione "deleteAllItemsFromList" per il modello generativo
-    private val deleteItems = defineFunction(
+    private val deleteItemsFunc = defineFunction(
         name = "deleteItems",
         description = "Elimina più elementi dalla lista della spesa esistente. L'ID della lista della spesa è ottenuto dalla funzione 'createList' ed è contenuto nel campo 'listId' del JSON restituito.",
         parameters = listOf(
@@ -181,7 +181,7 @@ class GeminiToolsHelper(
     )
     // Definizione della funzione "updateItems" per il modello generativo
     //TODO: da verificare
-    private val updateItemsTool = defineFunction(
+    private val updateItemsFunc = defineFunction(
         name = "updateItems",
         description = "Aggiorna più elementi della lista della spesa esistente. L'ID della lista della spesa può arrivare dalle funzioni 'createList', 'getListByName' o 'getAllLists'. Il campo si chiama 'listId' nel JSON restituito.",
         parameters = listOf(
@@ -190,14 +190,14 @@ class GeminiToolsHelper(
         ),
         requiredParameters = listOf("listId", "items")
     )
-    private val getListByName = defineFunction(
+    private val getListByNameFunc = defineFunction(
         name = "getListByName",
         description = "Recupera una lista dal suo nome. La lista restituita contiene l'ID della lista, il nome della lista e gli elementi della lista. Distingui gli elementi comopletati da quelli ancora da acquistare.",
        parameters = listOf( Schema.str("listName", "Il nome della lista da trovare"),),
         requiredParameters = listOf("listName")
     )
 
-    private val getAllListsTool = defineFunction(
+    private val getAllListsFunc = defineFunction(
         name = "getAllLists",
         description = "Recupera tutte le liste della spesa quando l'utente te lo chiede. " +
                 "Non serve alcun parametro. " +
@@ -211,12 +211,12 @@ class GeminiToolsHelper(
     )
 
     private val _tool = Tool(listOf(
-        createListTool,
-        addItems,
-        deleteItems,
-        getListByName,
-        getAllListsTool,
-        updateItemsTool
+        createListFunc,
+        addItemsFunc,
+        deleteItemsFunc,
+        getListByNameFunc,
+        getAllListsFunc,
+        updateItemsFunc
     ))
 
 
